@@ -18,7 +18,7 @@
     - 멀티 모듈 아키텍쳐 - 대규모 슈퍼앱이 충돌없이 유지보수될 수 있는 방법에 대한 고민 (참고: [Airbnb - Designing for Productivity in a Large-Scale iOS Application](https://medium.com/airbnb-engineering/designing-for-productivity-in-a-large-scale-ios-application-9376a430a0bf))
   - 입문하는 입장에서는 전체 토픽에 대해 자세하게 알지 못하는 것이 당연하지만, MVVM이나 클린아키텍쳐는 공고에서 계속 등장하기 때문에 이 정도에 대해서는 배경과 방법을 알아둘 필요는 있겠음
 
-## 첫 번째 앱
+## 첫 번째 앱: 심볼 롤러
 
 ![](imgs/first-project.png)
 
@@ -72,3 +72,8 @@
   2. 스토리보드의 디바이스 화면 상단 - 제일 왼쪽 버튼 누름 - 오른쪽에서 Custom Class 인스펙터 선택 - 새로 만든 뷰 컨트롤러를 Class에 입력
 - 뷰의 라이프사이클에 따른 처리는 뷰 컨트롤러에서 viewDidLoad, viewWillAppear, viewDidAppear 등을 오버라이드하여 할 수 있다.
 
+## 심플 웨더
+
+- StackView 조합하여 화면 구성
+  - StackView에 마진을 둬야 하는 경우 StackView를 View로 래핑하고, StackView를 View에 대해 제약사항 추가
+  
