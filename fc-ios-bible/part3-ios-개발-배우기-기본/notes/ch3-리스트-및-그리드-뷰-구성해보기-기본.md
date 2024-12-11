@@ -111,3 +111,169 @@
     ```
 
 ![](imgs/stock-final.png)
+
+## ChatList
+
+- 앞선 프로젝트와 유사했다.
+- 노트
+  - [UICollectionViewFlowLayout::estimatedItemSize](https://developer.apple.com/documentation/uikit/uicollectionviewflowlayout/estimateditemsize)
+    - UICollectionViewDelegateFlowLayout을 채택해 `collectionView(_:layout:sizeForItemAt:)`를 적절히 구현했음에도 셀의 너비가 스크린을 넘어가는 경우가 발생했다.  
+       ![](imgs/estimate-size-automatic.png)
+       - 몇 번 화면을 회전하고 스크롤을 하면 알맞은 사이즈를 찾아간다.
+    - 강의에서는 CollectionView의 사이즈 인스펙터에서 Estimate Size를 Automatic에서 None으로 변경하여 해결했다. (또는 코드에서 `layout.estimatedItemSize = .zero`)  
+      Automatic으로 하면 시스템이 임의로 계산한 값이 들어가는 모양이다.
+    - 관련 문서
+      - [Xcode 11에 생긴 Self-Size Cell 의 Estimate Size 는 무엇일까?](https://yagom.net/forums/topic/xcode-11에-생긴-self-size-cell-의-estimate-size-는-무엇일까/) 
+      - [Why on Xcode 11, UICollectionViewCell changes size as soon as you scroll (I already set size in sizeForItem AtIndexPath:)?](https://stackoverflow.com/questions/56840665/why-on-xcode-11-uicollectionviewcell-changes-size-as-soon-as-you-scroll-i-alre/58369142#58369142)
+  - `Content Compression Resistance Priority`
+    - 오토 레이아웃 제약 조건 상, 다른 오프젝트와의 간섭 등으로 원래 크기(Intrinsic Size)보다 작아져야할 때 우선순위를 정한다. 이 값이 작은 오브젝트가 더 줄어든다. 사이즈 인스펙터에서 지정할 수 있다.
+    - 이번 프로젝트에서는 채팅 내용이 표시되는 레이블과 날짜가 표시되는 레이블의 우선순위가 기본값대로 서로 같으면 (750) 날짜가 가려지는 문제가 발생했다.
+    - 채팅 내용 레이블의 `Content Compression Resistance Priority`를 250 정도로 줄여서 해결했다.
+    - 상반되는 속성으로 `Content Hugging Priority`가 있다. 이 값은 반대로 원래 크기보다 늘어나야할 때 우선순위를 정한다. 이 값이 작은 오브젝트가 더 늘어난다.
+    - 강의에서는 이 개념에 대해 문서만으로 이해하기는 어렵기 때문에, 직접 스토리보드에 두 가지 오브젝트를 놓고 여러 제약조건을 줘 가면서 테스트해보는 것을 권했다.
+  - [DateFormatter](https://developer.apple.com/documentation/foundation/dateformatter)를 이용한 날짜 형식 변환
+    - Chat 원본 데이터에는 날짜가 "yyyy-MM-dd" 꼴의 문자열이었는데, 완성 스크린샷을 보면 "M/d" 형태로 표시되어야 했다.
+    - DateFormatter를 이용해 문자열을 Date 객체로 바꾸고, 이를 다시 "M/d" 꼴의 문자열로 반환하도록 구현했다.  
+      ```swift
+      func formattedDateString(dateString: String) -> String {
+          let formatter = DateFormatter() // see: https://developer.apple.com/documentation/foundation/dateformatter
+          formatter.dateFormat = "yyyy-MM-dd"
+          
+          // 먼저 문자열을 Date로 변환
+          guard let date = formatter.date(from: dateString) else { return "" }
+          
+          // Date를 다시 문자열로 변환
+          formatter.dateFormat = "M/d"
+          return formatter.string(from: date)
+      }
+      ```
+    - [awakeFromNib()](https://developer.apple.com/documentation/objectivec/nsobject/1402907-awakefromnib)
+      - 재사용 셀의 커스텀 클래스에 이 메서드를 오버라이드하여 구현했다.
+      - 문서를 보면 Nib 파일에서 UI 로드되었을 때 호출되는 것으로 보인다. Nib 파일은 스토리보드로 만든 UI 객체가 바이너리 상태로 컨버팅된 파일이라는 것 같다.
+      - 강의에서는 재사용 셀이 deeque되어 로드되면 이 메서드가 호출된다고 하였고, 여기서 썸네일 이미지뷰에 대한 cornerRadius를 지정했다.
+        ```swift
+        // 스토리보드에서 재사용 셀이 deque될 때 호출됨
+        override func awakeFromNib() {
+            thumbnailImage.layer.cornerRadius = 10
+        }
+        ```
+- 과제
+  - 채팅 리스트를 날짜 기준 내림차순으로 정렬해 표시하기
+    - Array의 내장 메서드인 sorted를 이용하면 된다. viewDidLoad에서 수행했다. 이때 Chat::date는 String이므로 사전순 내림차로 정렬될 것이다.
+      ```swift
+      // 데이터 정렬
+      chatDataList = Chat.list.sorted {
+          $0.date > $1.date
+      }
+      ```
+
+![](imgs/chatList-final.png)
+
+## AppleFramework
+
+- 컬럼이 한 개가 아니라 여러 개라는 점에서 이전 프로젝트들과 달랐다.
+- 다만 크게 어려운 부분은 없었다. 컬럼 수를 명시하기보다 width와 spacing만 적절하게 주면 그리드에 맞게 잘 배치해준다.
+
+&nbsp;
+
+### 컬렉션 뷰
+- `UICollectionViewDelegateFlowLayout` 구현
+  ```swift
+  extension FrameworkListViewController: UICollectionViewDelegateFlowLayout {
+      // 셀들을 어떻게 배치할지
+      func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+          /*
+              cell     cell     cell
+           x [    ] v [    ] v [    ] x
+           padding  space    space    padding
+          */
+          
+          let interItemSpacing: CGFloat = 10
+          let padding: CGFloat = 16
+          
+          let width = (collectionView.bounds.width - interItemSpacing * 2 - padding * 2) / 3 // 한 셀의 너비는 전체 컬렉션뷰 너비에서 셀 사이의 간격과 좌우 패딩을 제외한 길이를 3으로 나눈 값
+          let height = width * 1.5
+          
+          return CGSize(width: width, height: height)
+      }
+      
+      // 셀간 간격
+      func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+          return 10
+      }
+      
+      // 로우간 간격
+      func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+          return 10
+      }
+  }
+  ```
+- 컬렉션 뷰의 Estimate Size 코드로 주기
+  - viewDidLoad에서,
+    ```swift
+    if let flowlayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+        flowlayout.estimatedItemSize = .zero // None
+    }
+    ```
+  - UICollectionViewLayout를 UICollectionViewFlowLayout로 캐스팅할 수 있다면, UICollectionViewFlowLayout의 프로퍼티인 estimatedItemSize를 0으로 지정
+    - 이런 방식의 레이아웃을 UICollectionViewFlowLayout로 지정함을 알 수 있었다. 실제로 스토리보드에도 Collection View에 Collection View Flow Layout 항목이 있다.
+  - 사이즈 인스펙터가 아니라 코드로 지정하면 동료나 미래의 내가 인스펙터를 열어보지 않아도 코드만으로 명시한 내용을 알 수 있다는 장점이 있다.
+- 컬렉션 뷰의 제약조건을 Safe Area가 아니라 Superview에 대해 지정  
+  ![](imgs/attach-to-superview.png)
+  - 제약조건을 Superview에 대해 지정하면 노치 등까지 셀이 노출된다.
+
+### 네비게이션 바
+
+- 과제 완성 스크린샷을 보면 상단 네비게이션 바가 있다.
+- 네이게이션 컨트롤을 추가하면 나타난다.  
+  ![](imgs/navigation-bar.png)
+- 네비게이션 컨트롤러의 타이틀 오브젝트의 어트리뷰트 인스펙터에서 Prefers Large Titles에 체크하면 화면과 같은 모습이 된다.
+
+### 시뮬레이터
+
+- 시뮬레이터에서 Cmd + Shift + A를 누르거나, Features - Toggle Apperance를 눌러 라이트 모드 - 다크 모드를 전환할 수 있다.
+
+### 과제
+
+- 컬럼 두 개, 컬럼 네 개로도 만들어보기
+  ```swift
+  // 컬럼 세 개
+  let width3 = (collectionView.bounds.width - interItemSpacing * 2 - padding * 2) / 3
+  
+  // 컬럼 두 개
+  let width2 = (collectionView.bounds.width - interItemSpacing * 1 - padding * 2) / 2
+  
+  // 컬럼 네 개
+  let width4 = (collectionView.bounds.width - interItemSpacing * 3 - padding * 2) / 4
+  ```
+- 컬럼이 네 개이면 이름이 다음 줄로 넘어가는 경우  
+  ```swift
+  override func awakeFromNib() {
+    super.awakeFromNib()
+    nameLabel.numberOfLines = 1
+    nameLabel.adjustsFontSizeToFitWidth = true
+  }
+  ```
+  - 저번 시간 등장한 awakeFromNib를 오버라이드하고 numberOfLines를 1로, adjustsFontSizeToFitWidth를 true로 설정했다.  
+  ![](imgs/adjust-font.png)
+
+### 고도화
+
+- 셀을 탭 했을 때 추가 정보 표시
+  ```swift
+  extension FrameworkListViewController: UICollectionViewDelegate {
+      func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+          print(data[indexPath.item])
+      }
+  }
+  ```
+  - `UICollectionViewDelegate`의 `collectionView(_:didSelectItemAt:)`를 구현하면, 어떤 셀이 선택되었을 때 해당 셀의 IndexPath를 받을 수 있다.
+- 네비게이션 바의 타이틀을 코드로 변경하기
+  ```swift
+  navigationController?.navigationBar.topItem?.title = "🍎 애플 프레임워크"
+  ```
+  - 이전에 네비게이션 컨트롤러를 임베드했기 때문에 nil이 아니다.
+
+### 참고자료
+
+- [UIKit - UINavigationController](https://developer.apple.com/documentation/uikit/uinavigationcontroller)
