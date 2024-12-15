@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="07K-eu-e7f">
+    <device id="retina6_3" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Focus View Controller-->
+        <scene sceneID="I8F-xe-kcA">
+            <objects>
+                <viewController storyboardIdentifier="FocusViewController" id="07K-eu-e7f" customClass="FocusViewController" customModule="HeadSpaceFocus" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ndd-tE-Rzx">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="ZW8-yK-wUH">
+                                <rect key="frame" x="0.0" y="62" width="402" height="812"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="FN5-HL-Bx6">
+                                    <size key="itemSize" width="402" height="204"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="FocusCollectionViewCell" id="VsJ-Zs-TrX" customClass="FocusCollectionViewCell" customModule="HeadSpaceFocus" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="402" height="204"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="K6Q-xg-o07">
+                                            <rect key="frame" x="0.0" y="0.0" width="402" height="204"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Focus music" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ebE-2Z-EVT">
+                                                    <rect key="frame" x="20.000000000000007" y="30" width="96.666666666666686" height="19.333333333333329"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Find and keep focus with music from world-renowned artists. Get in the zone with techno trailblazer Monika Kruse." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ik6-d6-B9B">
+                                                    <rect key="frame" x="20" y="61.333333333333336" width="202" height="95.666666666666657"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                    <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="2gK-AP-xvp">
+                                                    <rect key="frame" x="252" y="-0.3333333333333286" width="150" height="204.99999999999994"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="150" id="FgZ-c4-0u0"/>
+                                                    </constraints>
+                                                    <imageReference key="image" image="cloud.heavyrain.fill" catalog="system" renderingMode="original"/>
+                                                </imageView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="ebE-2Z-EVT" firstAttribute="leading" secondItem="K6Q-xg-o07" secondAttribute="leading" constant="20" id="2gU-0s-c4x"/>
+                                                <constraint firstItem="Ik6-d6-B9B" firstAttribute="leading" secondItem="K6Q-xg-o07" secondAttribute="leading" constant="20" id="5CZ-EC-Djz"/>
+                                                <constraint firstItem="Ik6-d6-B9B" firstAttribute="top" secondItem="ebE-2Z-EVT" secondAttribute="bottom" constant="12" id="ATm-cO-qzP"/>
+                                                <constraint firstAttribute="bottom" secondItem="2gK-AP-xvp" secondAttribute="bottom" id="YlS-cR-r6q"/>
+                                                <constraint firstItem="2gK-AP-xvp" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ebE-2Z-EVT" secondAttribute="trailing" constant="30" id="dzk-K8-zfn"/>
+                                                <constraint firstAttribute="trailing" secondItem="2gK-AP-xvp" secondAttribute="trailing" id="eKl-Qy-mkF"/>
+                                                <constraint firstItem="2gK-AP-xvp" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ik6-d6-B9B" secondAttribute="trailing" constant="30" id="kjM-Ah-9CZ"/>
+                                                <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="Ik6-d6-B9B" secondAttribute="bottom" constant="30" id="sbU-ly-zwi"/>
+                                                <constraint firstItem="2gK-AP-xvp" firstAttribute="top" secondItem="K6Q-xg-o07" secondAttribute="top" id="uJD-sF-Icv"/>
+                                                <constraint firstItem="ebE-2Z-EVT" firstAttribute="top" secondItem="K6Q-xg-o07" secondAttribute="top" constant="30" id="x6p-PF-FWy"/>
+                                            </constraints>
+                                        </collectionViewCellContentView>
+                                        <size key="customSize" width="402" height="204"/>
+                                        <connections>
+                                            <outlet property="descriptionLabel" destination="Ik6-d6-B9B" id="CdJ-IW-qE4"/>
+                                            <outlet property="thumbnailImageView" destination="2gK-AP-xvp" id="13m-Zb-Ud1"/>
+                                            <outlet property="titleLabel" destination="ebE-2Z-EVT" id="mL3-I1-XsT"/>
+                                        </connections>
+                                    </collectionViewCell>
+                                </cells>
+                            </collectionView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6g3-Fz-3MY">
+                                <rect key="frame" x="50" y="780" width="302" height="60"/>
+                                <color key="backgroundColor" systemColor="systemTealColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="un0-ch-HKa"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="See All">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="updateButtonTapped:" destination="07K-eu-e7f" eventType="touchUpInside" id="Gur-g3-9yA"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="xIF-vf-ToX"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="ZW8-yK-wUH" firstAttribute="bottom" secondItem="Ndd-tE-Rzx" secondAttribute="bottom" id="98f-9d-Eai"/>
+                            <constraint firstItem="ZW8-yK-wUH" firstAttribute="leading" secondItem="xIF-vf-ToX" secondAttribute="leading" id="W36-kS-9u6"/>
+                            <constraint firstItem="xIF-vf-ToX" firstAttribute="bottom" secondItem="6g3-Fz-3MY" secondAttribute="bottom" id="gnE-bc-Aal"/>
+                            <constraint firstItem="6g3-Fz-3MY" firstAttribute="leading" secondItem="xIF-vf-ToX" secondAttribute="leading" constant="50" id="m8t-ud-di2"/>
+                            <constraint firstItem="xIF-vf-ToX" firstAttribute="trailing" secondItem="ZW8-yK-wUH" secondAttribute="trailing" id="ncd-eu-bVh"/>
+                            <constraint firstItem="xIF-vf-ToX" firstAttribute="top" secondItem="ZW8-yK-wUH" secondAttribute="top" id="uZd-yl-Rwj"/>
+                            <constraint firstItem="6g3-Fz-3MY" firstAttribute="centerX" secondItem="xIF-vf-ToX" secondAttribute="centerX" id="wed-Pu-SOF"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="collectionView" destination="ZW8-yK-wUH" id="DPS-1A-x6N"/>
+                        <outlet property="updateButton" destination="6g3-Fz-3MY" id="nik-x0-FcG"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="aqZ-hT-Jgd" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-74.626865671641781" y="108.46681922196795"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="cloud.heavyrain.fill" catalog="system" width="126" height="128"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemTealColor">
+            <color red="0.18823529411764706" green="0.69019607843137254" blue="0.7803921568627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>
