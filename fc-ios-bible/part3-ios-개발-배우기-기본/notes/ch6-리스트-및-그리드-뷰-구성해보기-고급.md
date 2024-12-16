@@ -324,9 +324,9 @@
   }
   ```
 - `orthogonalScrollingBehavior`
-  - 위에서, 그룹을 horizontal로 초기화했음에도 그룹들이 아래로 붙게 되어 마치 수직 스크롤처럼 된다. 강의에서는 그 이유를 그룹의 너비가 컬렉션 뷰 너비의 0.8을 차지하기 때문에 아래로 붙게 되는 것이라고 설명한다.
+  - 위에서, 그룹을 horizontal로 초기화했음에도 그룹들이 아래로 붙게 되어 마치 수직 스크롤처럼 된다. 강의에서는 그 이유를 그룹의 너비가 컬렉션 뷰 너비의 0.8을 차지하기 때문에 더 이상 옆으로 붙을 공간이 없어 아래로 붙게 되는 것이라고 설명한다.
   - 이때 orthogonalScrollingBehavior를 .continuous, .groupPaging, .groupPagingCentered 등으로 설정하면 수평으로 붙게 된다.
-  - 다만, [문서](https://developer.apple.com/documentation/appkit/nscollectionlayoutsectionorthogonalscrollingbehavior)에서는 특정 섹션은 기본적으로 컬렉션 뷰의 scrollDirection 프로퍼티를 따라 배치되는데, orthogonalScrollingBehavior는 이 프로퍼티와는 상관 없이 스크롤 동작을 지정할 수 있는 프로퍼티라고 설명하고 있다. 사이즈?와는 관련이 없어보이는 이야기다. 조금 더 찾아볼 필요는 있겠다.
+  - 다만, [문서](https://developer.apple.com/documentation/appkit/nscollectionlayoutsectionorthogonalscrollingbehavior)에서는 특정 섹션은 기본적으로 컬렉션 뷰의 scrollDirection 프로퍼티(기본값 .vertical)를 따라 배치되는데, orthogonalScrollingBehavior는 이 프로퍼티와는 상관 없이 스크롤 동작을 지정할 수 있는 프로퍼티라고 설명하고 있다. 사이즈?와는 관련이 없어보이는 이야기다. 조금 더 찾아볼 필요는 있겠다.
   - 아무튼 이 예제에서는 그룹의 너비를 0.8로 해두고, 이 프로퍼티를 .groupPagingCentered로 지정해 가운데 정렬되어 페이징되도록 했다.
 - `visibleItemsInvalidationHandler`
   - [문서](https://developer.apple.com/documentation/appkit/nscollectionlayoutsection/visibleitemsinvalidationhandler)에 따르면 레이아웃 사이클 시작 전에 호출되는 클로져로, 오브젝트 표시 전 수정 작업을 여기서 수행할 수 있다고 한다.
