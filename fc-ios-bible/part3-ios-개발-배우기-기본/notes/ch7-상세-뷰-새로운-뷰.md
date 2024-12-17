@@ -257,65 +257,65 @@
         - 컨텐츠 길이에 따라 높이가 달라질 수 있어 아이템과 그룹의 높이를 .estimated로 잡음
       - 이쯤에서 collectionView(_:didSelectItemAt:)에 self.present를 이용해 새로 만든 뷰를 미리 볼 수 있음. 아래에서 네비게이션으로 바꿀 것임.
 - 섹션에 대한 헤더 만들기  
-      ![](imgs/reusable-cell.png)  
-      - QuickFocus 스토리보드의 컬렉션 뷰의 셀 위에(사실 위치는 크게 상관 없을 듯) `CollectionReusableView` 추가
-      - 안에 제목을 넣을 레이블을 넣어둠
-      - `UICollectionReusableView`를 상속하는 `QuickFocusHeaderCollectionReusableView`를 만들고 커스텀 클래스로 추가. Identifier도 동일하게 부여.
-        - `QuickFocusHeaderCollectionReusableView`에는 제목이 들어갈 레이블을 연결하고 `title: String`을 받아 제목을 업데이트하는 configure 메서드 구현
-      - `QuickFocusListViewController`로 돌아와서 다음 추가
-        - viewDidLoad  
-          ```swift
-          // class QuickFocusListViewController: UIViewController 
+  ![](imgs/reusable-cell.png)  
+  - QuickFocus 스토리보드의 컬렉션 뷰의 셀 위에(사실 위치는 크게 상관 없을 듯) `CollectionReusableView` 추가
+  - 안에 제목을 넣을 레이블을 넣어둠
+  - `UICollectionReusableView`를 상속하는 `QuickFocusHeaderCollectionReusableView`를 만들고 커스텀 클래스로 추가. Identifier도 동일하게 부여
+    - `QuickFocusHeaderCollectionReusableView`에는 제목이 들어갈 레이블을 연결하고 `title: String`을 받아 제목을 업데이트하는 configure 메서드 구현
+  - `QuickFocusListViewController`로 돌아와서 다음 추가
+    - viewDidLoad  
+      ```swift
+      // class QuickFocusListViewController: UIViewController 
 
-          override func viewDidLoad() {
-              super.viewDidLoad()
-              
-              // Presentation
-              self.dataSource = initDataSource()
-              
-              // **** HERE ****
-              dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
-                  guard let headerView = self.collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "QuickFocusHeaderCollectionReusableView", for: indexPath) as? QuickFocusHeaderCollectionReusableView else {
-                      return UICollectionReusableView()
-                  }
-                  
-                  let section = Section.allCases[indexPath.section]
-                  
-                  headerView.configure(title: section.title)
-                  
-                  return headerView
+      override func viewDidLoad() {
+          super.viewDidLoad()
+          
+          // Presentation
+          self.dataSource = initDataSource()
+          
+          // **** HERE ****
+          dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+              guard let headerView = self.collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "QuickFocusHeaderCollectionReusableView", for: indexPath) as? QuickFocusHeaderCollectionReusableView else {
+                  return UICollectionReusableView()
               }
-              // ****************
               
-              // ...
+              let section = Section.allCases[indexPath.section]
+              
+              headerView.configure(title: section.title)
+              
+              return headerView
           }
-          ```
-        - 데이터소스의 `supplementaryViewProvider`에 아까 만든 재사용 뷰를 꺼내와 초기화하는 클로져 할당
-        - `ofKind`를 `UICollectionView.elementKindSectionHeader`로 지정해 섹션 헤더에 대한 보조 뷰임을 명시하는 것 같음.
-        - dequeueReusableSupplementaryView 메서드를 통해 재사용 뷰를 불러옴
-        - ItemPath에는 현재 섹션의 인덱스가 section 멤버로 포함되어 있음. configure로 전달해 UI 초기화
-        - 불러온 재사용 뷰를 반환
-      - `initLayout`
-        ```swift
-        private func initLayout() -> UICollectionViewCompositionalLayout {
-            
-            // ...
-            
-            let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = .init(top: 30, leading: 20, bottom: 30, trailing: 20)
-            section.interGroupSpacing = 20
-            
-            // **** HERE ****
-            let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(20))
-            let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
-            section.boundarySupplementaryItems = [header]
-            // **************
+          // ****************
+          
+          // ...
+      }
+      ```
+    - 데이터소스의 `supplementaryViewProvider`에 아까 만든 재사용 뷰를 꺼내와 초기화하는 클로져 할당
+    - `ofKind`를 `UICollectionView.elementKindSectionHeader`로 지정해 섹션 헤더에 대한 보조 뷰임을 명시하는 것 같음.
+    - dequeueReusableSupplementaryView 메서드를 통해 재사용 뷰를 불러옴
+    - ItemPath에는 현재 섹션의 인덱스가 section 멤버로 포함되어 있음. configure로 전달해 UI 초기화
+    - 불러온 재사용 뷰를 반환
+  - `initLayout`
+    ```swift
+    private func initLayout() -> UICollectionViewCompositionalLayout {
+        
+        // ...
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = .init(top: 30, leading: 20, bottom: 30, trailing: 20)
+        section.interGroupSpacing = 20
+        
+        // **** HERE ****
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(20))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        section.boundarySupplementaryItems = [header]
+        // **************
 
-            let layout = UICollectionViewCompositionalLayout(section: section)
-            return layout
-        }
-        ```
-        - 헤더 뷰의 사이즈를 정의하고, section에 할당 (`section.boundarySupplementaryItems = [header]`)
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        return layout
+    }
+    ```
+    - 헤더 뷰의 사이즈를 정의하고, section에 할당 (`section.boundarySupplementaryItems = [header]`)
 - 네비게이션 추가
   - Main 스토리보드로 돌아와서 Focus 뷰 선택 후, Editor - Embed in - Navigaton Controller
   - `FocusViewController`로 돌아와서 `collectionView(_:didSelectItemAt:)`에 네비게이션 추가
