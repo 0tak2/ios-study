@@ -9,6 +9,7 @@ import UIKit
 
 class ReminderListViewController: UICollectionViewController {    
     var dataSource: DataSource!
+    var reminders: [Reminder] = Reminder.sampleData
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,7 +28,7 @@ class ReminderListViewController: UICollectionViewController {
         // create a new snapshot
         var snapshot = Snapshot()
         snapshot.appendSections([0])
-        snapshot.appendItems(Reminder.sampleData.map{ $0.title })
+        snapshot.appendItems(Reminder.sampleData.map{ $0.id })
         
         // Apply the snapshot to the data source
         dataSource.apply(snapshot) // reflects the changes in the user interface
