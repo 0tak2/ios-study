@@ -26,7 +26,7 @@ extension ReminderListViewController {
         snapshot.appendItems(Reminder.sampleData.map{ $0.id })
         
         if !ids.isEmpty {
-            snapshot.reloadItems(ids)
+            snapshot.reloadItems(ids) // 이전 스냅샷과 비교했을 때, id는 동일하지만 내용이 변경된 데이터가 있다면 알려줘야 반영된다
         }
         
         // Apply the snapshot to the data source
