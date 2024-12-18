@@ -15,6 +15,8 @@ extension ReminderListViewController {
         let reminder = Reminder.sampleData[indexPath.item]
         var contentConfiguration = cell.defaultContentConfiguration() // a content configuration with the predefined system style
         contentConfiguration.text = reminder.title
+        contentConfiguration.secondaryText = reminder.dueDate.dayAndTimeText
+        contentConfiguration.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .caption1)
         cell.contentConfiguration = contentConfiguration
     }
 }
