@@ -8,8 +8,8 @@
 import UIKit
 
 class ReminderViewController: UICollectionViewController {
-    private typealias DataSource = UICollectionViewDiffableDataSource<Int, Row>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Row>
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, Row>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Row>
     
     var reminder: Reminder
     private var dataSource: DataSource!
@@ -34,12 +34,19 @@ class ReminderViewController: UICollectionViewController {
     }
     
     func cellRegistrationHandler(cell: UICollectionViewListCell, indexPath: IndexPath, row: Row) {
-        var contentConfiguration = cell.defaultContentConfiguration()
-        contentConfiguration.text = text(for: row)
-        contentConfiguration.textProperties.font = UIFont.preferredFont(forTextStyle: row.textStyle)
-        contentConfiguration.image = row.image
+        let section = section(for: indexPath)
+        switch (section, row) {
+        case (.view, _):
+            var contentConfiguration = cell.defaultContentConfiguration()
+            contentConfiguration.text = text(for: row)
+            contentConfiguration.textProperties.font = UIFont.preferredFont(forTextStyle: row.textStyle)
+            contentConfiguration.image = row.image
+            
+            cell.contentConfiguration = contentConfiguration
+        default:
+            fatalError("이 조합 (섹션, 로우)은 예상되지 않았습니다")
+        }
         
-        cell.contentConfiguration = contentConfiguration
         cell.tintColor = .todayPrimaryTint
     }
     
@@ -58,8 +65,19 @@ class ReminderViewController: UICollectionViewController {
             navigationItem.style = .navigator
         }
         navigationItem.title = NSLocalizedString("Reminder", comment: "ReminderViewController의 타이틀")
+        navigationItem.rightBarButtonItem = editButtonItem // editButtonItem은 UIViewController에 정의된 프로퍼티. isEditing, setEditing 등도 이미 정의되어 있다.
         
-        updateSnaphost()
+        updateSnaphostForViewing()
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        
+        if editing {
+            updateSnaphostForEditing()
+        } else {
+            updateSnaphostForViewing()
+        }
     }
     
     func text(for row: Row) -> String? {
@@ -71,10 +89,24 @@ class ReminderViewController: UICollectionViewController {
         }
     }
     
-    private func updateSnaphost() {
+    private func updateSnaphostForEditing() {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.title, .date, .notes])
+        dataSource.apply(snapshot)
+    }
+    
+    private func updateSnaphostForViewing() {
         var snaphost = Snapshot()
-        snaphost.appendSections([0])
-        snaphost.appendItems([Row.title, Row.date, Row.time, Row.notes], toSection: 0)
+        snaphost.appendSections([.view])
+        snaphost.appendItems([Row.title, Row.date, Row.time, Row.notes], toSection: .view)
         dataSource.apply(snaphost)
+    }
+    
+    private func section(for indexPath: IndexPath) -> Section {
+        let sectionNumber = isEditing ? indexPath.section + 1 : indexPath.section
+        guard let section = Section(rawValue: sectionNumber) else {
+            fatalError("섹션을 찾을 수 없었습니다")
+        }
+        return section
     }
 }
