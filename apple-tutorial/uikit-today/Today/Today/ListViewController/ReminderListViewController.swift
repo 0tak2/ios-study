@@ -25,13 +25,7 @@ class ReminderListViewController: UICollectionViewController {
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: itemIdentifier)
         })
         
-        // create a new snapshot
-        var snapshot = Snapshot()
-        snapshot.appendSections([0])
-        snapshot.appendItems(Reminder.sampleData.map{ $0.id })
-        
-        // Apply the snapshot to the data source
-        dataSource.apply(snapshot) // reflects the changes in the user interface
+        updateSnapshot()
     }
 
     private func listLayout() -> UICollectionViewCompositionalLayout {

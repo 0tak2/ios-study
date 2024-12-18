@@ -11,6 +11,20 @@ extension ReminderListViewController {
     typealias DataSource = UICollectionViewDiffableDataSource<Int, Reminder.ID>
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Reminder.ID>
     
+    func updateSnapshot(reloading ids: [Reminder.ID] = []) {
+        // create a new snapshot
+        var snapshot = Snapshot()
+        snapshot.appendSections([0])
+        snapshot.appendItems(Reminder.sampleData.map{ $0.id })
+        
+        if !ids.isEmpty {
+            snapshot.reloadItems(ids)
+        }
+        
+        // Apply the snapshot to the data source
+        dataSource.apply(snapshot) // reflects the changes in the user interface
+    }
+    
     func cellRegistrationHandler(cell: UICollectionViewListCell, indexPath: IndexPath, id: Reminder.ID) {
         let reminder = getReminder(withdId: id)
         var contentConfiguration = cell.defaultContentConfiguration() // a content configuration with the predefined system style
@@ -41,11 +55,20 @@ extension ReminderListViewController {
         reminders[index] = reminder
     }
     
+    func completeReminder(withId id: Reminder.ID) {
+        var reminder = getReminder(withdId: id)
+        reminder.isComplete.toggle()
+        updateReminder(reminder)
+        updateSnapshot(reloading: [id])
+    }
+    
     private func doneButtonConfiguration(for reminder: Reminder) -> UICellAccessory.CustomViewConfiguration {
         let symbolName = reminder.isComplete ? "circle.fill" : "circle"
         let symbolConfiguration = UIImage.SymbolConfiguration(textStyle: .title1)
         let image = UIImage(systemName: symbolName, withConfiguration: symbolConfiguration)
-        let button = UIButton()
+        let button = ReminderDoneButton()
+        button.addTarget(self, action: #selector(didPressDoneButton(_:)), for: .touchUpInside)
+        button.id = reminder.id
         button.setImage(image, for: .normal)
         return UICellAccessory.CustomViewConfiguration(customView: button, placement: .leading(displayed: .always))
     }
