@@ -27,6 +27,21 @@ class ReminderListViewController: UICollectionViewController {
         
         updateSnapshot()
     }
+    
+    /**
+     특정 아이템이 선택되었을 때 이 아이템이 선택되어도 되는 아이템인지 확인하고자 호출됨
+     */
+    override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        let id = reminders[indexPath.item].id
+        pushDetailViewForReminder(withId: id) // 디테일 뷰를 네비게이션 컨트롤러에 push
+        return false // 선택됨을 UI상에 표시하지 않음
+    }
+    
+    func pushDetailViewForReminder(withId id: Reminder.ID) {
+        let reminder = getReminder(withdId: id)
+        let vc = ReminderViewController(reminder: reminder)
+        navigationController?.pushViewController(vc, animated: true) // 네비게이션 컨트롤러는 스택처럼 작동함
+    }
 
     private func listLayout() -> UICollectionViewCompositionalLayout {
         var listConfiguration = UICollectionLayoutListConfiguration(appearance: .grouped) // 섹션
