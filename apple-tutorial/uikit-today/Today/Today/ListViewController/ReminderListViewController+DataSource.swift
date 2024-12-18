@@ -11,6 +11,14 @@ extension ReminderListViewController {
     typealias DataSource = UICollectionViewDiffableDataSource<Int, Reminder.ID>
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Reminder.ID>
     
+    var reminderCompletedValue: String {
+        NSLocalizedString("완료됨", comment: "완료된 리마인더 항목")
+    }
+    
+    var reminderNotCompletedValue: String {
+        NSLocalizedString("완료되지 않음", comment: "완료되지 않은 리마인더 항목")
+    }
+    
     func updateSnapshot(reloading ids: [Reminder.ID] = []) {
         // create a new snapshot
         var snapshot = Snapshot()
@@ -35,11 +43,12 @@ extension ReminderListViewController {
         
         var doneButtonConfiguration = doneButtonConfiguration(for: reminder)
         doneButtonConfiguration.tintColor = .todayListCellDoneButtonTint
+        cell.accessibilityCustomActions = [doneButtonAccessibilityAction(for: reminder)]
+        cell.accessibilityValue = reminder.isComplete ? reminderCompletedValue : reminderNotCompletedValue
         cell.accessories = [
             .customView(configuration: doneButtonConfiguration),
             .disclosureIndicator(displayed: .always),
         ]
-        
         var backgroundConfiguration = UIBackgroundConfiguration.listGroupedCell()
         backgroundConfiguration.backgroundColor = .todayListCellBackground
         cell.backgroundConfiguration = backgroundConfiguration
@@ -60,6 +69,15 @@ extension ReminderListViewController {
         reminder.isComplete.toggle()
         updateReminder(reminder)
         updateSnapshot(reloading: [id])
+    }
+    
+    private func doneButtonAccessibilityAction(for reminder: Reminder) -> UIAccessibilityCustomAction {
+        let name = NSLocalizedString("완료 여부 토글하기", comment: "완료 버튼 접근성 레이블")
+        let action = UIAccessibilityCustomAction(name: name) { [weak self] action in // weakly capture
+            self?.completeReminder(withId: reminder.id)
+            return true
+        }
+        return action
     }
     
     private func doneButtonConfiguration(for reminder: Reminder) -> UICellAccessory.CustomViewConfiguration {
