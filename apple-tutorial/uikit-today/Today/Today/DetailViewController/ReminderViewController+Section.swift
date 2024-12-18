@@ -20,7 +20,7 @@ extension ReminderViewController {
             case .title:
                 return NSLocalizedString("제목", comment: "Title 섹션 이름")
             case .date:
-                return NSLocalizedString("일시", comment: "Date 섹션 이름")
+                return NSLocalizedString("기한", comment: "Date 섹션 이름")
             case .notes:
                 return NSLocalizedString("노트", comment: "Notes 섹션 이름")
             }
