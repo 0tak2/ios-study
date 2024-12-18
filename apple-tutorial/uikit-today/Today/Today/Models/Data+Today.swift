@@ -26,7 +26,8 @@ extension Date {
         if Locale.current.calendar.isDateInToday(self) { // Date가 오늘인 경우
             return NSLocalizedString("오늘", comment: "기한이 오늘인 경우 설명")
         } else {
-            return formatted(.dateTime.month().day().weekday(.wide))
+            // return formatted(.dateTime.month().day().weekday(.wide))
+            return formatted(.dateTime.month().day().weekday(.wide).locale(Locale(identifier: "ko_KR")))
         }
     }
 }
