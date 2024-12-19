@@ -25,6 +25,13 @@ class ReminderListViewController: UICollectionViewController {
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: itemIdentifier)
         })
         
+        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didPressAddButton(_:)))
+        addButton.accessibilityLabel = NSLocalizedString("새 Reminder 추가", comment: "신규 리마인더 버튼 접근성 레이블")
+        navigationItem.rightBarButtonItem = addButton
+        if #available(iOS 16, *) {
+            navigationItem.style = .navigator
+        }
+        
         updateSnapshot()
     }
     
@@ -39,7 +46,10 @@ class ReminderListViewController: UICollectionViewController {
     
     func pushDetailViewForReminder(withId id: Reminder.ID) {
         let reminder = getReminder(withdId: id)
-        let vc = ReminderViewController(reminder: reminder)
+        let vc = ReminderViewController(reminder: reminder) { [weak self] reminder in
+            self?.updateReminder(reminder)
+            self?.updateSnapshot(reloading: [reminder.id])
+        }
         navigationController?.pushViewController(vc, animated: true) // 네비게이션 컨트롤러는 스택처럼 작동함
     }
 

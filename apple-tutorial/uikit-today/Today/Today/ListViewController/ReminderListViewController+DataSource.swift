@@ -23,7 +23,7 @@ extension ReminderListViewController {
         // create a new snapshot
         var snapshot = Snapshot()
         snapshot.appendSections([0])
-        snapshot.appendItems(Reminder.sampleData.map{ $0.id })
+        snapshot.appendItems(reminders.map{ $0.id })
         
         if !ids.isEmpty {
             snapshot.reloadItems(ids) // 이전 스냅샷과 비교했을 때, id는 동일하지만 내용이 변경된 데이터가 있다면 알려줘야 반영된다
@@ -69,6 +69,10 @@ extension ReminderListViewController {
         reminder.isComplete.toggle()
         updateReminder(reminder)
         updateSnapshot(reloading: [id])
+    }
+    
+    func addReminder(_ reminder: Reminder) {
+        reminders.append(reminder)
     }
     
     private func doneButtonAccessibilityAction(for reminder: Reminder) -> UIAccessibilityCustomAction {

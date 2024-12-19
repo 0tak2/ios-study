@@ -11,11 +11,20 @@ class ReminderViewController: UICollectionViewController {
     private typealias DataSource = UICollectionViewDiffableDataSource<Section, Row>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Row>
     
-    var reminder: Reminder
+    var reminder: Reminder {
+        didSet {
+            onChange(reminder)
+        }
+    }
+    var workingReminder: Reminder
+    var isAddingNewReminder = false
+    var onChange: (Reminder) -> Void
     private var dataSource: DataSource!
     
-    init(reminder: Reminder) {
+    init(reminder: Reminder, onChange: @escaping (Reminder) -> Void) {
         self.reminder = reminder
+        self.workingReminder = reminder
+        self.onChange = onChange // init이 종료되고도 클로져가 실행될 수 있도록 인자 정의에 @escaping을 붙여준다.
         var listConfiguration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         listConfiguration.showsSeparators = false
         listConfiguration.headerMode = .firstItemInSection // TODO: Review UICollectionView to learn about other ways to display headers in collection views
@@ -54,6 +63,11 @@ class ReminderViewController: UICollectionViewController {
         cell.tintColor = .todayPrimaryTint
     }
     
+    @objc func didCancelEdit() {
+        workingReminder = reminder // 작업 내용 초기화
+        setEditing(false, animated: true)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -78,9 +92,13 @@ class ReminderViewController: UICollectionViewController {
         super.setEditing(editing, animated: animated)
         
         if editing {
-            updateSnaphostForEditing()
+            prepareForEditing()
         } else {
-            updateSnaphostForViewing()
+            if isAddingNewReminder {
+                onChange(workingReminder)
+            } else {
+                prepareForViewing()
+            }
         }
     }
     
@@ -98,6 +116,21 @@ class ReminderViewController: UICollectionViewController {
         snaphost.appendSections([.view])
         snaphost.appendItems([Row.header(""), Row.title, Row.date, Row.time, Row.notes], toSection: .view)
         dataSource.apply(snaphost)
+    }
+    
+    private func prepareForEditing() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(didCancelEdit))
+        updateSnaphostForEditing()
+    }
+    
+    private func prepareForViewing() {
+        navigationItem.leftBarButtonItem = nil
+        
+        if reminder != workingReminder { // could be compared because of comforming Equatable
+            reminder = workingReminder
+        }
+        
+        updateSnaphostForViewing()
     }
     
     private func section(for indexPath: IndexPath) -> Section {
