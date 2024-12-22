@@ -12,9 +12,10 @@ import SafariServices
 class SearchViewController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
-    private var dataSource: UICollectionViewDiffableDataSource<Int, SearchResult>!
+    private typealias Item = SearchResult
+    private var dataSource: UICollectionViewDiffableDataSource<Int, Item>!
     
-    @Published private var results: [SearchResult] = []
+    @Published private var users: [SearchResult] = []
     private var subscriptions = Set<AnyCancellable>()
     
     private let networkService = NetworkService(configuration: .default)
@@ -22,6 +23,14 @@ class SearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        embedSearchControl()
+        
+        configureCollectionView()
+        
+        bind()
+    }
+    
+    private func embedSearchControl() {
         navigationItem.title = "Search"
         
         let searchController = UISearchController()
@@ -30,35 +39,34 @@ class SearchViewController: UIViewController {
         searchController.searchBar.delegate = self
         searchController.hidesNavigationBarDuringPresentation = false
         navigationItem.searchController = searchController
-        
-        // Collection View
+    }
+    
+    private func configureCollectionView() {
         collectionView.delegate = self
         collectionView.collectionViewLayout = layout()
-        dataSource = UICollectionViewDiffableDataSource<Int, SearchResult> (collectionView: collectionView, cellProvider: { collectionView, indexPath, result in
+        dataSource = UICollectionViewDiffableDataSource<Int, Item> (collectionView: collectionView, cellProvider: { collectionView, indexPath, result in
             guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "ResultCell", for: indexPath) as? ResultCell else { return UICollectionViewCell() }
+                withReuseIdentifier: "ResultCell", for: indexPath) as? ResultCell else { return nil }
             
             cell.user.text = result.login
             
             return cell
         })
-        
-        bind()
     }
     
     private func bind() {
-        $results
+        $users
             .receive(on: RunLoop.main)
-            .sink { [weak self] results in
-                self?.applyDataSource(results: results)
+            .sink { [weak self] users in
+                self?.applyDataSource(users: users)
             }
             .store(in: &subscriptions)
     }
     
-    private func applyDataSource(results: [SearchResult]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, SearchResult>()
+    private func applyDataSource(users: [SearchResult]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, Item>()
         snapshot.appendSections([0])
-        snapshot.appendItems(results)
+        snapshot.appendItems(users)
         dataSource.apply(snapshot)
     }
     
@@ -83,14 +91,15 @@ extension SearchViewController {
         
         networkService.load(resource)
             .receive(on: RunLoop.main)
+            .map({ $0.items })
             .sink { completion in
                 switch completion {
                 case .finished: break
                 case .failure(let error):
                     print("request failed. detail: \(error)")
                 }
-            } receiveValue: { [weak self] responseData in
-                self?.results = responseData.items
+            } receiveValue: { [weak self] results in
+                self?.users = results
             }
             .store(in: &subscriptions)
     }
@@ -99,7 +108,7 @@ extension SearchViewController {
 extension SearchViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let query = searchController.searchBar.text, !query.isEmpty else {
-            results = []
+            users = []
             return
         }
         
@@ -111,8 +120,8 @@ extension SearchViewController: UISearchResultsUpdating {
 
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let query = searchBar.text else {
-            results = []
+        guard let query = searchBar.text, !query.isEmpty else {
+            users = []
             return
         }
         
@@ -124,7 +133,7 @@ extension SearchViewController: UISearchBarDelegate {
 
 extension SearchViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let user = results[indexPath.item]
+        let user = users[indexPath.item]
         let safariVC = SFSafariViewController(url: user.htmlUrl)
         safariVC.modalPresentationStyle = .pageSheet
         present(safariVC, animated: true)
