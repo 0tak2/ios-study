@@ -71,3 +71,20 @@
 
 - 강의에서는 Operator나 Subscriber에 클로져를 넘길 때 내부에 self를 그대로 strong 캡쳐해 참조하는데, 메모리 누수 걱정을 하지 않아도 되는지 모르겠다. 일단은 weak 캡쳐로 고쳐 썼다.
 
+## 실습 3 - 깃험 사용자 검색
+
+- [안 보고 해본 SearchViewController](https://github.com/0tak2/ios-study/blob/768cbb9d9a3623fc8caee584786794fd34b39367/fc-ios-bible/part5-network/projects/GithubUserSearch/GithubUserSearch/View/SearchViewController.swift)
+
+- 거의 비슷했다. [수정 diff](https://github.com/0tak2/ios-study/commit/4af0d26737abd076179b14b0bad2b2ebf7094870)
+
+- 강의에서 Combine을 활용하는 부분이 인상깊었다.
+  ```swift
+  URLSession.shared.dataTaskPublisher(for: request)
+    .map { $0.data }
+    .decode(type: SearchUserResponse.self, decoder: JSONDecoder())
+    .map { $0.items }
+    .replaceError(with: [])
+    .receive(on: RunLoop.main)
+    .assign(to: \.users, on: self)
+    .store(in: &subscriptions)
+  ```
