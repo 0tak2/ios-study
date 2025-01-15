@@ -58,6 +58,8 @@ print(current.formatted()) // 14/01/2025, 10:27 PM
 print(current.formatted(date: .complete, time: .omitted)) // Tuesday, 14 January 2025
 print(current.formatted(date: .omitted, time: .complete)) // 10:27:59 PM GMT+9
 print(current.formatted(date: .numeric, time: .standard)) // 14/01/2025, 10:29:11 PM
+// Date.FormatStyle을 넘겨 더 자세하게 세팅할 수도 있다 see: https://developer.apple.com/documentation/foundation/date/formatstyle
+// 아래 DateFormatter 예제 코드 참고
 
 // MARK: - 범위
 let range: ClosedRange<Date> = current...current + 10

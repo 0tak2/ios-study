@@ -42,3 +42,26 @@ print(convertedDate2)
 let dummyData = "2025!01!15!!!!14:12:25!0900"
 let trial = dateFormatter.date(from: dummyData)
 print("suceess: \(trial != nil)")
+
+// MARK: - [참고] Date.FormatStyle, Date.ParseStrategy 활용
+// https://developer.apple.com/documentation/foundation/date/formatstyle
+// https://developer.apple.com/documentation/foundation/date/parsestrategy
+// 
+// Date.FormatStyle과 Date.ParseStrategy를 이용하면 보다 선언적인 방식으로 날짜 표현을 다룰 수 있다.
+// 다만... 개인적으로는 템플릿 방식의 DateFormatter가 익숙하긴 하다...
+//
+// 영미권의 경우 월을 셀 때 별도의 단어를 쓰고 축약하기도 해서 이런 선언적인 방식이 편리하다고 느껴질 수 있겠지만,
+// 우리나라에서는 주로 일자를 표현할 때 아라비아 숫자에 단위만 붙여서 표현하기 때문인지 크게 체감되지는 않았다.
+
+let format = Date.FormatStyle()
+    .year(.defaultDigits)
+    .month(.narrow)
+    .day(.defaultDigits)
+    .locale(Locale(identifier: "ko_KR"))
+let formatted = Date.now.formatted(format)
+print(formatted)
+
+let parseStrategy = Date.ParseStrategy(format: "\(year: .defaultDigits)년 \(month: .narrow)월 \(day: .defaultDigits)일", locale: Locale(identifier: "ko_KR"), timeZone: TimeZone.current)
+if let converted = try? Date("2026년 4월 12일", strategy: parseStrategy) {
+    print(converted)
+}
