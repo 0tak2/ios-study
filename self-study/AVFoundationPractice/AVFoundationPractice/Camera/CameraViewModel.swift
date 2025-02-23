@@ -14,6 +14,10 @@ class CameraViewModel {
     var currentFrame: CGImage?
     private let camera = Camera()
     
+    var isRecording: Bool {
+        camera.isRecording
+    }
+    
     init() {
         Task {
             await camera.start()
@@ -31,6 +35,14 @@ class CameraViewModel {
     
     func switchDevice() {
         camera.switchCaptureDevice()
+    }
+    
+    func startRecording() {
+        camera.startRecording()
+    }
+    
+    func stopRecording() {
+        camera.stopRecording()
     }
 }
 

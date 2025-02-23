@@ -29,7 +29,7 @@ struct ToolBarView: View {
                 Spacer()
                 
                 Button {
-                    print("tapped")
+                    !viewModel.isRecording ? viewModel.startRecording() : viewModel.stopRecording()
                 } label: {
                     Image(systemName: "record.circle.fill")
                         .resizable()

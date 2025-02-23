@@ -16,6 +16,7 @@ class Camera: NSObject {
     private var isCaptureSessionConfigured = false
     private var deviceInput: AVCaptureDeviceInput?
     private var videoOutput: AVCaptureVideoDataOutput?
+    private var movieFileOutput: AVCaptureMovieFileOutput?
     private var sessionQueue = DispatchQueue(label: "com.youngtaek.iOSStudy.Camera.sessionQueue")
     
     private var allCaptureDevices: [AVCaptureDevice] {
@@ -70,6 +71,10 @@ class Camera: NSObject {
         captureSession.isRunning
     }
     
+    var isRecording: Bool {
+        movieFileOutput?.isRecording ?? false
+    }
+    
     private var addToPreviewStream: ((CIImage) -> Void)?
     
     lazy var previewStream: AsyncStream<CIImage> = {
@@ -104,6 +109,8 @@ class Camera: NSObject {
             completionHandler(success)
         }
         
+        // MARK: add input and outputs
+        
         guard let captureDevice = captureDevice,
               let deviceInput = try? AVCaptureDeviceInput(device: captureDevice) else {
             logger.error("failed to obtain video input")
@@ -118,8 +125,20 @@ class Camera: NSObject {
             return
         }
         
+        let movieOutput = AVCaptureMovieFileOutput()
+        
+        guard captureSession.canAddOutput(movieOutput) else {
+            logger.error("Unable to add movie file output to capture session.")
+            return
+        }
+        
         captureSession.addInput(deviceInput)
         captureSession.addOutput(videoOutput)
+        captureSession.addOutput(movieOutput)
+        
+        self.deviceInput = deviceInput
+        self.videoOutput = videoOutput
+        self.movieFileOutput = movieOutput
         
         isCaptureSessionConfigured = true
         success = true
@@ -238,6 +257,25 @@ class Camera: NSObject {
             self.captureDevice = AVCaptureDevice.default(for: .video)
         }
     }
+    
+    func startRecording() {
+        guard let movieFileOutput = movieFileOutput,
+              let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("video.mp4") else { return }
+      if movieFileOutput.isRecording == false {
+        if FileManager.default.fileExists(atPath: url.path) {
+          try? FileManager.default.removeItem(at: url)
+        }
+        movieFileOutput.startRecording(to: url, recordingDelegate: self)
+      }
+    }
+
+    func stopRecording() {
+        guard let movieFileOutput = movieFileOutput else { return }
+              
+        if isRecording {
+            movieFileOutput.stopRecording()
+        }
+    }
 }
 
 extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
@@ -250,6 +288,12 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
         
         addToPreviewStream?(CIImage(cvPixelBuffer: pixelBuffer))
+    }
+}
+
+extension Camera: AVCaptureFileOutputRecordingDelegate {
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: (any Error)?) {
+        logger.debug("didFinishRecordingTo - \(outputFileURL)")
     }
 }
 
