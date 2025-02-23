@@ -1,5 +1,5 @@
 //
-//  ViewModel.swift
+//  CameraViewModel.swift
 //  AVFoundationPractice
 //
 //  Created by 임영택 on 2/22/25.
@@ -10,9 +10,16 @@ import AVFoundation
 import SwiftUI
 
 @Observable
-class ViewModel {
+class CameraViewModel {
     var currentFrame: CGImage?
     private let camera = Camera()
+    
+    init() {
+        Task {
+            await camera.start()
+            await handleCameraPreviews()
+        }
+    }
     
     func handleCameraPreviews() async {
         for await frame in camera.previewStream {
@@ -22,11 +29,8 @@ class ViewModel {
         }
     }
     
-    init() {
-        Task {
-            await camera.start()
-            await handleCameraPreviews()
-        }
+    func switchDevice() {
+        camera.switchCaptureDevice()
     }
 }
 

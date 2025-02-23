@@ -8,10 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var viewModel = ViewModel()
-    
     var body: some View {
-        CameraView(image: $viewModel.currentFrame)
+        CameraView()
+            .statusBar(hidden: true)
     }
 }
 

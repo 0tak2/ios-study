@@ -61,7 +61,7 @@ class Camera: NSObject {
             guard let captureDevice = captureDevice else { return }
             logger.debug("[captureDevice didSet] \(captureDevice.localizedName)")
             sessionQueue.async {
-                // TODO: call self.updateSessionForCaptureDevice(captureDevice)
+                self.updateSessionForCaptureDevice(captureDevice)
             }
         }
     }
@@ -147,6 +147,41 @@ class Camera: NSObject {
         }
     }
     
+    private func updateSessionForCaptureDevice(_ captureDevice: AVCaptureDevice) {
+        guard isCaptureSessionConfigured else { return }
+        
+        captureSession.beginConfiguration()
+        defer { captureSession.commitConfiguration() }
+
+        for input in captureSession.inputs {
+            if let deviceInput = input as? AVCaptureDeviceInput {
+                captureSession.removeInput(deviceInput)
+            }
+        }
+        
+        let deviceInput: AVCaptureDeviceInput
+        do {
+            deviceInput = try AVCaptureDeviceInput(device: captureDevice)
+        } catch let error {
+            logger.error("Error getting capture device input: \(error.localizedDescription)")
+            return
+        }
+        
+        if !captureSession.inputs.contains(deviceInput) && captureSession.canAddInput(deviceInput) {
+            captureSession.addInput(deviceInput)
+        }
+    }
+    
+    private func deviceInputFor(device: AVCaptureDevice?) -> AVCaptureDeviceInput? {
+        guard let validDevice = device else { return nil }
+        do {
+            return try AVCaptureDeviceInput(device: validDevice)
+        } catch let error {
+            logger.error("Error getting capture device input: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
     // FIXME: Using deprecated APIs
     private func videoOrientationFor(_ deviceOrientation: UIDeviceOrientation) -> AVCaptureVideoOrientation? {
         switch deviceOrientation {
@@ -191,6 +226,16 @@ class Camera: NSObject {
             sessionQueue.async { [self] in
                 self.captureSession.stopRunning()
             }
+        }
+    }
+    
+    func switchCaptureDevice() {
+        if let captureDevice = captureDevice,
+           let index = availableCaptureDevices.firstIndex(of: captureDevice) {
+            let nextIndex = (index + 1) % availableCaptureDevices.count
+            self.captureDevice = availableCaptureDevices[nextIndex]
+        } else {
+            self.captureDevice = AVCaptureDevice.default(for: .video)
         }
     }
 }
