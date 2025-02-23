@@ -9,6 +9,7 @@ import Foundation
 import AVFoundation
 import CoreImage
 import OSLog
+import UIKit
 
 class Camera: NSObject {
     private let captureSession = AVCaptureSession()
@@ -79,6 +80,15 @@ class Camera: NSObject {
         }
     }()
     
+    private var deviceOrientation: UIDeviceOrientation {
+        var orientation = UIDevice.current.orientation
+        if orientation == .unknown {
+            logger.warning("Device's orientation is unknown. Will set to portrait.")
+            orientation = .portrait
+        }
+        return orientation
+    }
+    
     override init() {
         super.init()
         captureDevice = availableCaptureDevices.first ?? AVCaptureDevice.default(for: .video)
@@ -137,6 +147,17 @@ class Camera: NSObject {
         }
     }
     
+    // FIXME: Using deprecated APIs
+    private func videoOrientationFor(_ deviceOrientation: UIDeviceOrientation) -> AVCaptureVideoOrientation? {
+        switch deviceOrientation {
+        case .portrait: return AVCaptureVideoOrientation.portrait
+        case .portraitUpsideDown: return AVCaptureVideoOrientation.portraitUpsideDown
+        case .landscapeLeft: return AVCaptureVideoOrientation.landscapeRight
+        case .landscapeRight: return AVCaptureVideoOrientation.landscapeLeft
+        default: return nil
+        }
+    }
+    
     func start() async {
         let authorized = await checkAuthorization()
         guard authorized else {
@@ -177,6 +198,12 @@ class Camera: NSObject {
 extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
     public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
+        
+        if connection.isVideoOrientationSupported,
+           let videoOrientation = videoOrientationFor(deviceOrientation) {
+            connection.videoOrientation = videoOrientation
+        }
+        
         addToPreviewStream?(CIImage(cvPixelBuffer: pixelBuffer))
     }
 }
