@@ -11,6 +11,7 @@ import UIKit
 class LoginView: UIView {
     let stackView = UIStackView()
     let usernameTextField = UITextField()
+    let dividerView = UIView()
     let passwordTextField = UITextField()
     
     override init(frame: CGRect) {
@@ -29,7 +30,7 @@ extension LoginView {
     func style() {
         translatesAutoresizingMaskIntoConstraints = false
         
-        backgroundColor = .brown
+        backgroundColor = .secondarySystemBackground
         
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical // 축을 결정한다.
@@ -43,10 +44,17 @@ extension LoginView {
         passwordTextField.placeholder = "Password"
         passwordTextField.isSecureTextEntry = true
         passwordTextField.delegate = self
+        
+        dividerView.translatesAutoresizingMaskIntoConstraints = false
+        dividerView.backgroundColor = .secondarySystemFill
+        
+        layer.cornerRadius = 5
+        clipsToBounds = true
     }
     
     func layout() {
         stackView.addArrangedSubview(usernameTextField)
+        stackView.addArrangedSubview(dividerView)
         stackView.addArrangedSubview(passwordTextField)
         addSubview(stackView)
         
@@ -56,6 +64,8 @@ extension LoginView {
             trailingAnchor.constraint(equalToSystemSpacingAfter: stackView.trailingAnchor, multiplier: 1),
             bottomAnchor.constraint(equalToSystemSpacingBelow: stackView.bottomAnchor, multiplier: 1),
         ])
+        
+        dividerView.heightAnchor.constraint(equalToConstant: 1).isActive = true
     }
 }
 
@@ -67,12 +77,7 @@ extension LoginView: UITextFieldDelegate {
     }
     
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-        if textField.text != "" {
-            return true
-        } else {
-            return false
-        }
-        // FIXME: why not just return `textField.text != ""`
+        true
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
