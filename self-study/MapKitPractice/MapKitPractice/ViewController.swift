@@ -10,11 +10,15 @@ import MapKit
 
 class ViewController: UIViewController {
     private let mapView = MKMapView()
+    private let controlView = MapControlView()
     private let initialLocation = CLLocation(latitude: 37.559975221378, longitude: 126.975312652739)
+    private var regionRadius = 1000.0
+    private let zoomStep = 500.0 // TODO: 같은 값을 증감하는게 아니라 현재 스케일에 따라서 다르게 줘야할 것 같음...
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // MARK: Map View
         mapView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(mapView)
         NSLayoutConstraint.activate([
@@ -24,10 +28,53 @@ class ViewController: UIViewController {
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         
-        mapView.centerToLocation(initialLocation)
+        mapView.centerToLocation(initialLocation, regionRadius: regionRadius)
         
         let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 200000)
         mapView.setCameraZoomRange(zoomRange, animated: true)
+        
+        // MARK: Control View
+        controlView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(controlView)
+        NSLayoutConstraint.activate([
+            controlView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            controlView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
+            controlView.widthAnchor.constraint(equalToConstant: 48),
+            controlView.heightAnchor.constraint(equalToConstant: 96),
+        ])
+        
+        controlView.plusButton.addTarget(self, action: #selector(plusButtonTapped), for: .touchUpInside)
+        controlView.minusButton.addTarget(self, action: #selector(minusButtonTapped), for: .touchUpInside)
+    }
+}
+
+extension ViewController {
+    @objc private func plusButtonTapped() {
+        adjustZoomLevel(to: .zoomIn)
+    }
+    
+    @objc private func minusButtonTapped() {
+        adjustZoomLevel(to: .zoomOut)
+    }
+    
+    private func adjustZoomLevel(to direction: ZoomDirection) {
+        if case .zoomIn = direction {
+            if regionRadius - zoomStep >= 0 {
+                regionRadius -= zoomStep
+            }
+        } else {
+            regionRadius += zoomStep
+        }
+        
+        let coord = mapView.centerCoordinate
+        let loc = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+        
+        mapView.centerToLocation(loc, regionRadius: regionRadius)
+    }
+    
+    private enum ZoomDirection {
+        case zoomIn
+        case zoomOut
     }
 }
 
