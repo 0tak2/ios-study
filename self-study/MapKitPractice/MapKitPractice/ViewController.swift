@@ -15,6 +15,13 @@ class ViewController: UIViewController {
     private var regionRadius = 1000.0
     private let zoomFactor = 0.5
     
+    private var locationManager: CLLocationManager!
+    private lazy var userLocation: UserLocation = .init(coordinate: self.initialLocation.coordinate) {
+        didSet {
+            mapView.addAnnotation(self.userLocation)
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -45,6 +52,11 @@ class ViewController: UIViewController {
         
         controlView.plusButton.addTarget(self, action: #selector(plusButtonTapped), for: .touchUpInside)
         controlView.minusButton.addTarget(self, action: #selector(minusButtonTapped), for: .touchUpInside)
+        
+        // MARK: User's Location
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
     }
 }
 
@@ -74,6 +86,16 @@ extension ViewController {
     private enum ZoomDirection {
         case zoomIn
         case zoomOut
+    }
+}
+
+extension ViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedWhenInUse,
+           let currentLocation = manager.location {
+            self.userLocation = UserLocation(coordinate: currentLocation.coordinate)
+            mapView.centerToLocation(currentLocation)
+        }
     }
 }
 
