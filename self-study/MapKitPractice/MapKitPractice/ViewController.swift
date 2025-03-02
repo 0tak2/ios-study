@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     private let controlView = MapControlView()
     private let initialLocation = CLLocation(latitude: 37.559975221378, longitude: 126.975312652739)
     private var regionRadius = 1000.0
-    private let zoomStep = 500.0 // TODO: 같은 값을 증감하는게 아니라 현재 스케일에 따라서 다르게 줘야할 것 같음...
+    private let zoomFactor = 0.5
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,18 +58,17 @@ extension ViewController {
     }
     
     private func adjustZoomLevel(to direction: ZoomDirection) {
-        if case .zoomIn = direction {
-            if regionRadius - zoomStep >= 0 {
-                regionRadius -= zoomStep
-            }
+        var region = mapView.region
+
+        if direction == .zoomIn {
+            region.span.latitudeDelta *= zoomFactor
+            region.span.longitudeDelta *= zoomFactor
         } else {
-            regionRadius += zoomStep
+            region.span.latitudeDelta /= zoomFactor
+            region.span.longitudeDelta /= zoomFactor
         }
-        
-        let coord = mapView.centerCoordinate
-        let loc = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
-        
-        mapView.centerToLocation(loc, regionRadius: regionRadius)
+
+        mapView.setRegion(region, animated: true)
     }
     
     private enum ZoomDirection {
