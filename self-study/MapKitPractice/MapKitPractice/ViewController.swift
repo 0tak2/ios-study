@@ -11,6 +11,13 @@ import MapKit
 class ViewController: UIViewController {
     private let mapView = MKMapView()
     private let controlView = MapControlView()
+    private let locationButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "location.circle"), for: .normal)
+        button.backgroundColor = .black
+        button.alpha = 0.8
+        return button
+    }()
     private let initialLocation = CLLocation(latitude: 37.559975221378, longitude: 126.975312652739)
     private var regionRadius = 1000.0
     private let zoomFactor = 0.5
@@ -18,6 +25,7 @@ class ViewController: UIViewController {
     private var locationManager: CLLocationManager!
     private lazy var userLocation: UserLocation = .init(coordinate: self.initialLocation.coordinate) {
         didSet {
+            mapView.removeAnnotation(oldValue)
             mapView.addAnnotation(self.userLocation)
         }
     }
@@ -50,8 +58,18 @@ class ViewController: UIViewController {
             controlView.heightAnchor.constraint(equalToConstant: 96),
         ])
         
+        locationButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(locationButton)
+        NSLayoutConstraint.activate([
+            locationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            locationButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            locationButton.widthAnchor.constraint(equalToConstant: 48),
+            locationButton.heightAnchor.constraint(equalToConstant: 48),
+        ])
+        
         controlView.plusButton.addTarget(self, action: #selector(plusButtonTapped), for: .touchUpInside)
         controlView.minusButton.addTarget(self, action: #selector(minusButtonTapped), for: .touchUpInside)
+        locationButton.addTarget(self, action: #selector(locationButtonTapped), for: .touchUpInside)
         
         // MARK: User's Location
         locationManager = CLLocationManager()
@@ -69,6 +87,12 @@ extension ViewController {
         adjustZoomLevel(to: .zoomOut)
     }
     
+    @objc private func locationButtonTapped() {
+        if let currentLocation = self.locationManager.location {
+            updateUserLocation(for: currentLocation)
+        }
+    }
+    
     private func adjustZoomLevel(to direction: ZoomDirection) {
         var region = mapView.region
 
@@ -83,6 +107,11 @@ extension ViewController {
         mapView.setRegion(region, animated: true)
     }
     
+    private func updateUserLocation(for location: CLLocation) {
+        self.userLocation = UserLocation(coordinate: location.coordinate)
+        mapView.centerToLocation(location)
+    }
+    
     private enum ZoomDirection {
         case zoomIn
         case zoomOut
@@ -93,8 +122,7 @@ extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedWhenInUse,
            let currentLocation = manager.location {
-            self.userLocation = UserLocation(coordinate: currentLocation.coordinate)
-            mapView.centerToLocation(currentLocation)
+            updateUserLocation(for: currentLocation)
         }
     }
 }
