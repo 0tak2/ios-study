@@ -90,6 +90,52 @@ extension ViewController {
     @objc private func locationButtonTapped() {
         if let currentLocation = self.locationManager.location {
             updateUserLocation(for: currentLocation)
+            
+            let geocoder = CLGeocoder.init()
+            geocoder.reverseGeocodeLocation(currentLocation, preferredLocale: Locale(identifier: "ko-KR")) { places, error in
+                if error == nil,
+                   let places = places {
+                    /**
+                     CLPlacemark
+                     
+                     var thoroughfare: String?
+                     The street address associated with the placemark.
+                     
+                     var subThoroughfare: String?
+                     Additional street-level information for the placemark.
+                     
+                     var locality: String?
+                     The city associated with the placemark.
+                     
+                     var subLocality: String?
+                     Additional city-level information for the placemark.
+                     
+                     var administrativeArea: String?
+                     The state or province associated with the placemark.
+                     
+                     var subAdministrativeArea: String?
+                     Additional administrative area information for the placemark.
+                     
+                     var postalCode: String?
+                     The postal code associated with the placemark.
+                     */
+                    guard let firstPlace = places.first else { return }
+                    print("thoroughfare: \(firstPlace.thoroughfare ?? "")")
+                    print("subThoroughfare: \(firstPlace.subThoroughfare ?? "")")
+                    print("locality: \(firstPlace.locality ?? "")")
+                    print("subLocality: \(firstPlace.subLocality ?? "")")
+                    print("administrativeArea: \(firstPlace.administrativeArea ?? "")")
+                    print("subAdministrativeArea: \(firstPlace.subAdministrativeArea ?? "")")
+                    print("postalCode: \(firstPlace.postalCode ?? "")")
+                    
+                    // MARK: Full Adress
+                    let formattedAddressLines = firstPlace.addressDictionary?["FormattedAddressLines"] as? [String]
+                    print("formattedAddressLines: \(formattedAddressLines ?? [])")
+                    
+                    let debugDescription = firstPlace.debugDescription
+                    print("debugDescription: \(debugDescription)")
+                }
+            }
         }
     }
     
