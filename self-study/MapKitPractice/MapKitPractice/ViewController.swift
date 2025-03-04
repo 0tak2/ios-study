@@ -18,6 +18,13 @@ class ViewController: UIViewController {
         button.alpha = 0.8
         return button
     }()
+    private let addressLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 24, weight: .bold)
+        label.textColor = .black
+        return label
+    }()
+    
     private let initialLocation = CLLocation(latitude: 37.559975221378, longitude: 126.975312652739)
     private var regionRadius = 1000.0
     private let zoomFactor = 0.5
@@ -27,6 +34,12 @@ class ViewController: UIViewController {
         didSet {
             mapView.removeAnnotation(oldValue)
             mapView.addAnnotation(self.userLocation)
+            self.updateUserAddress(location: CLLocation(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude))
+        }
+    }
+    private var userAddress: String = "" {
+        didSet {
+            addressLabel.text = userAddress
         }
     }
     
@@ -71,6 +84,13 @@ class ViewController: UIViewController {
         controlView.minusButton.addTarget(self, action: #selector(minusButtonTapped), for: .touchUpInside)
         locationButton.addTarget(self, action: #selector(locationButtonTapped), for: .touchUpInside)
         
+        addressLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(addressLabel)
+        NSLayoutConstraint.activate([
+            addressLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            addressLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        ])
+        
         // MARK: User's Location
         locationManager = CLLocationManager()
         locationManager.delegate = self
@@ -90,58 +110,12 @@ extension ViewController {
     @objc private func locationButtonTapped() {
         if let currentLocation = self.locationManager.location {
             updateUserLocation(for: currentLocation)
-            
-            let geocoder = CLGeocoder.init()
-            geocoder.reverseGeocodeLocation(currentLocation, preferredLocale: Locale(identifier: "ko-KR")) { places, error in
-                if error == nil,
-                   let places = places {
-                    /**
-                     CLPlacemark
-                     
-                     var thoroughfare: String?
-                     The street address associated with the placemark.
-                     
-                     var subThoroughfare: String?
-                     Additional street-level information for the placemark.
-                     
-                     var locality: String?
-                     The city associated with the placemark.
-                     
-                     var subLocality: String?
-                     Additional city-level information for the placemark.
-                     
-                     var administrativeArea: String?
-                     The state or province associated with the placemark.
-                     
-                     var subAdministrativeArea: String?
-                     Additional administrative area information for the placemark.
-                     
-                     var postalCode: String?
-                     The postal code associated with the placemark.
-                     */
-                    guard let firstPlace = places.first else { return }
-                    print("thoroughfare: \(firstPlace.thoroughfare ?? "")")
-                    print("subThoroughfare: \(firstPlace.subThoroughfare ?? "")")
-                    print("locality: \(firstPlace.locality ?? "")")
-                    print("subLocality: \(firstPlace.subLocality ?? "")")
-                    print("administrativeArea: \(firstPlace.administrativeArea ?? "")")
-                    print("subAdministrativeArea: \(firstPlace.subAdministrativeArea ?? "")")
-                    print("postalCode: \(firstPlace.postalCode ?? "")")
-                    
-                    // MARK: Full Adress
-                    let formattedAddressLines = firstPlace.addressDictionary?["FormattedAddressLines"] as? [String]
-                    print("formattedAddressLines: \(formattedAddressLines ?? [])")
-                    
-                    let debugDescription = firstPlace.debugDescription
-                    print("debugDescription: \(debugDescription)")
-                }
-            }
         }
     }
     
     private func adjustZoomLevel(to direction: ZoomDirection) {
         var region = mapView.region
-
+        
         if direction == .zoomIn {
             region.span.latitudeDelta *= zoomFactor
             region.span.longitudeDelta *= zoomFactor
@@ -149,7 +123,7 @@ extension ViewController {
             region.span.latitudeDelta /= zoomFactor
             region.span.longitudeDelta /= zoomFactor
         }
-
+        
         mapView.setRegion(region, animated: true)
     }
     
@@ -158,10 +132,77 @@ extension ViewController {
         mapView.centerToLocation(location)
     }
     
-    private enum ZoomDirection {
-        case zoomIn
-        case zoomOut
+    private func updateUserAddress(location: CLLocation) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location, preferredLocale: Locale(identifier: "ko-KR")) { places, error in
+            guard error == nil else {
+                print("reverseGeocodeLocation error - \(error?.localizedDescription ?? "N/A")")
+                return
+            }
+            
+            if let places = places {
+                /**
+                 CLPlacemark
+                 
+                 var thoroughfare: String?
+                 The street address associated with the placemark.
+                 
+                 var subThoroughfare: String?
+                 Additional street-level information for the placemark.
+                 
+                 var locality: String?
+                 The city associated with the placemark.
+                 
+                 var subLocality: String?
+                 Additional city-level information for the placemark.
+                 
+                 var administrativeArea: String?
+                 The state or province associated with the placemark.
+                 
+                 var subAdministrativeArea: String?
+                 Additional administrative area information for the placemark.
+                 
+                 var postalCode: String?
+                 The postal code associated with the placemark.
+                 */
+                guard let firstPlace = places.first else { return }
+                print("country: \(firstPlace.country ?? "")")
+                print("thoroughfare: \(firstPlace.thoroughfare ?? "")")
+                print("subThoroughfare: \(firstPlace.subThoroughfare ?? "")")
+                print("locality: \(firstPlace.locality ?? "")")
+                print("subLocality: \(firstPlace.subLocality ?? "")")
+                print("administrativeArea: \(firstPlace.administrativeArea ?? "")")
+                print("subAdministrativeArea: \(firstPlace.subAdministrativeArea ?? "")")
+                print("postalCode: \(firstPlace.postalCode ?? "")")
+                
+                // MARK: Full Address
+                let formattedAddressLines = firstPlace.addressDictionary?["FormattedAddressLines"] as? [String]
+                print("formattedAddressLines: \(formattedAddressLines ?? [])")
+                
+                let debugDescription = firstPlace.debugDescription
+                print("debugDescription: \(debugDescription)")
+                // 용강동 112-12, 대한민국 서울특별시 마포구 용강동 112-12, 04166 @ <+37.54129517,+126.94210786> +/- 100.00m, region CLCircularRegion (identifier:'<+37.54123010,+126.94214170> radius 70.65', center:<+37.54123010,+126.94214170>, radius:70.65m)
+                
+                guard firstPlace.country == "대한민국" else { return }
+                
+                let chunks = debugDescription.split(separator: ", ")
+                guard chunks.count >= 2 else { return }
+                
+                let fullAddress = chunks[1]
+                guard fullAddress.count >= 3 else { return }
+                
+                let addressComponents = fullAddress.split(separator: " ")
+                let address = "\(addressComponents[2]) \(addressComponents[3])"
+                
+                self.userAddress = address
+            }
+        }
     }
+}
+
+private enum ZoomDirection {
+    case zoomIn
+    case zoomOut
 }
 
 extension ViewController: CLLocationManagerDelegate {
