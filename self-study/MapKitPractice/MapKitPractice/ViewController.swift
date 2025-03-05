@@ -179,22 +179,27 @@ extension ViewController {
                 let formattedAddressLines = firstPlace.addressDictionary?["FormattedAddressLines"] as? [String]
                 print("formattedAddressLines: \(formattedAddressLines ?? [])")
                 
+                // MARK: debugDescription
                 let debugDescription = firstPlace.debugDescription
                 print("debugDescription: \(debugDescription)")
                 // 용강동 112-12, 대한민국 서울특별시 마포구 용강동 112-12, 04166 @ <+37.54129517,+126.94210786> +/- 100.00m, region CLCircularRegion (identifier:'<+37.54123010,+126.94214170> radius 70.65', center:<+37.54123010,+126.94214170>, radius:70.65m)
                 
-                guard firstPlace.country == "대한민국" else { return }
-                
-                let chunks = debugDescription.split(separator: ", ")
-                guard chunks.count >= 2 else { return }
-                
-                let fullAddress = chunks[1]
-                guard fullAddress.count >= 3 else { return }
-                
-                let addressComponents = fullAddress.split(separator: " ")
-                let address = "\(addressComponents[2]) \(addressComponents[3])"
-                
-                self.userAddress = address
+                do {
+                    let regex = /대한민국.*?,/
+                    if let match = try regex.firstMatch(in: debugDescription) {
+                        let matchedString = match.output // "대한민국 서울특별시 마포구 용강동 112-12,"
+                        let addressComponents = matchedString.split(separator: " ")
+                        if addressComponents.count >= 4 {
+                            let districtName = "\(addressComponents[2])"
+                            let localityNameFallback = "\(addressComponents[3])"
+                            let shortAddress = "\(districtName) \(firstPlace.subLocality ?? localityNameFallback)"
+                            print("result: \(shortAddress)")
+                            self.userAddress = shortAddress
+                        }
+                    }
+                } catch {
+                    print("faild to parse debugDescription... error: \(error.localizedDescription)")
+                }
             }
         }
     }
