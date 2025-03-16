@@ -5,5 +5,8 @@
 
 import Foundation
 
-struct OnboardingContent {
+struct OnboardingContent: Hashable {
+  let title: String
+  let subtitle: String
+  let imageName: String
 }
