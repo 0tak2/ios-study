@@ -92,6 +92,7 @@ private struct TodoListContentView: View {
       HStack {
         Text("할 일 목록")
           .font(.system(size: 16, weight: .bold))
+          .padding(.top, 10)
           .padding(.leading, 20)
         
         Spacer()
@@ -132,8 +133,8 @@ private struct TodoCellView: View {
             todoListViewModel.selectedBoxTapped(todo)
           } label: {
             todo.selected
-            ? Image(systemName: "selectBox")
-            : Image(systemName: "unSelectBox")
+            ? Image("selectedBox")
+            : Image("unSelectedBox")
           }
 
         }
@@ -141,6 +142,7 @@ private struct TodoCellView: View {
         VStack(alignment: .leading, spacing: 5) {
           Text(todo.title)
             .font(.system(size: 16))
+            .strikethrough(todo.selected)
             .foregroundStyle(todo.selected ? Color.customIconGray : Color.customBlack)
           
           Text(todo.convertedDayAndTime)
@@ -155,8 +157,8 @@ private struct TodoCellView: View {
               todoListViewModel.todoRemoveSelectedBoxTapped(todo)
             } label: {
               isRemoveSelected
-              ? Image(systemName: "selectBox")
-              : Image(systemName: "unSelectBox")
+              ? Image("selectedBox")
+              : Image("unSelectedBox")
             }
           }
         }
