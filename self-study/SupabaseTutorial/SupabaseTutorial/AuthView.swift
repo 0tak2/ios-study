@@ -63,7 +63,7 @@ struct AuthView: View {
             do {
                 try await supabase.auth.signInWithOTP(
                     email: email,
-                    redirectTo: URL(string: "supabasetutorial://login-callback")!
+                    redirectTo: URL(string: "com.youngtaek.supabasetutorial://login-callback")
                 )
                 result = .success(())
             } catch {

@@ -8,10 +8,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.youngtaek.SupabaseTutorial</string>
+			<string></string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>supabasetutorial</string>
+				<string>com.youngtaek.supabasetutorial</string>
 			</array>
 		</dict>
 	</array>
