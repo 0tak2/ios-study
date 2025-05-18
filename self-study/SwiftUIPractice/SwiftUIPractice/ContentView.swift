@@ -28,6 +28,12 @@ struct ContentView: View {
                         LockScreenView()
                     }
                 }
+                
+                Section("Calc") {
+                    NavigationLink("Calc") {
+                        CalcView()
+                    }
+                }
             }
         }
     }
