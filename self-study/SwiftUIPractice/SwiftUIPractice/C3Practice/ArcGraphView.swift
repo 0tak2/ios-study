@@ -27,15 +27,33 @@ struct ArcGraphView: View {
                 .foregroundStyle(Color.arcBackground)
             
             Arc(startAngle: currentAngle)
-                .foregroundStyle(RadialGradient(
+//                .foregroundStyle(RadialGradient(
+//                    stops: [
+//                        .init(color: .start, location: 0.25),
+//                        .init(color: .middle, location: 0.38),
+//                        .init(color: .end, location: 0.51),
+//                    ],
+//                    center: .center,
+//                    startRadius: 180,
+//                    endRadius: 0))
+                .foregroundStyle(AngularGradient(
                     stops: [
                         .init(color: .start, location: 0.25),
                         .init(color: .middle, location: 0.38),
                         .init(color: .end, location: 0.51),
                     ],
                     center: .center,
-                    startRadius: 180,
-                    endRadius: 0))
+                    angle: .degrees(90)))
+            
+//            Rectangle()
+//                .foregroundStyle(AngularGradient(
+//                    stops: [
+//                        .init(color: .start, location: 0.25),
+//                        .init(color: .middle, location: 0.38),
+//                        .init(color: .end, location: 0.51),
+//                    ],
+//                    center: .center,
+//                    angle: .degrees(90)))
         }
         .frame(width: 324, height: 162)
         .padding(12)
