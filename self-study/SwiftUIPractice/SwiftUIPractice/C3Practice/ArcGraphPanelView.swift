@@ -44,15 +44,15 @@ struct ArcGraphPanelView: View {
             
             HStack {
                 Button {
-                    currentWeights += 0.1
-                } label: {
-                    Image(systemName: "plus")
-                }
-                
-                Button {
                     currentWeights -= 0.1
                 } label: {
                     Image(systemName: "minus")
+                }
+                
+                Button {
+                    currentWeights += 0.1
+                } label: {
+                    Image(systemName: "plus")
                 }
             }
         }
