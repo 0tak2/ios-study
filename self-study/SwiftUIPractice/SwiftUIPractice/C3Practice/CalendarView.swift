@@ -9,50 +9,65 @@ import SwiftUI
 
 struct CalendarView: View {
     @State var currentYearMonth: Date
+    var previousYearMonth: Date {
+        return currentYearMonth.previousMonth
+    }
+    var nextYearMonth: Date {
+        return currentYearMonth.nextMonth
+    }
     @State var calendarOffset: CGFloat = 0
     
-    private var yearInKorean: String {
-        let component = Calendar.current.component(.year, from: currentYearMonth)
-        return "\(component)년"
-    }
-    
-    private var monthInKorean: String {
-        let component = Calendar.current.component(.month, from: currentYearMonth)
-        return "\(component)월"
-    }
-    
     var body: some View {
-        VStack {
-            Text("\(yearInKorean) \(monthInKorean)")
-            HeaderView()
-            DaysView(currentYearMonth: currentYearMonth)
-        }
-        .background(.clear)
-        .offset(.init(width: calendarOffset, height: 0))
-        .gesture(DragGesture()
-            .onChanged { gesture in
-                calendarOffset = gesture.translation.width
+        GeometryReader { proxy in
+            HStack {
+                makeOneMonthCalendar(currentYearMonth: previousYearMonth)
+                .frame(width: proxy.size.width)
+                
+                makeOneMonthCalendar(currentYearMonth: currentYearMonth)
+                .frame(width: proxy.size.width)
+                
+                makeOneMonthCalendar(currentYearMonth: nextYearMonth)
+                .frame(width: proxy.size.width)
             }
-            .onEnded({ gesture in
-                calendarOffset = 0
-                let translationWidth: CGFloat = gesture.translation.width
-                
-                if translationWidth < -150 {
-                    print("next")
-                    changeMonth(by: 1)
+            .offset(.init(width: calendarOffset - proxy.size.width, height: 0)) // 가운데 캘린더가 노출된 상태에서 offset 반영 => -proxy.size.width + calendarOffset
+            .gesture(DragGesture()
+                .onChanged { gesture in
+                    calendarOffset = gesture.translation.width
                 }
-                
-                if translationWidth > 150 {
-                    print("prev")
-                    changeMonth(by: -1)
-                }
-            }))
+                .onEnded({ gesture in
+                    calendarOffset = 0
+                    let translationWidth: CGFloat = gesture.translation.width
+                    
+                    if translationWidth < -150 {
+                        print("next")
+                        changeMonth(by: 1)
+                    }
+                    
+                    if translationWidth > 150 {
+                        print("prev")
+                        changeMonth(by: -1)
+                    }
+                }))
+        }
     }
     
     private func changeMonth(by value: Int) {
         let calendar = Calendar.current
         if let newMonth = calendar.date(byAdding: .month, value: value, to: currentYearMonth) {
             self.currentYearMonth = newMonth
+        }
+    }
+    
+    @ViewBuilder
+    private func makeOneMonthCalendar(currentYearMonth: Date) -> some View {
+        ZStack {
+            VStack {
+                Text("\(currentYearMonth.yearInKorean) \(currentYearMonth.monthInKorean)")
+                HeaderView()
+                DaysView(currentYearMonth: currentYearMonth)
+            }
+            
+            Color.clear
         }
     }
 }
@@ -128,6 +143,30 @@ extension DaysView {
         let firstWeekDay = firstWeekDayAsGregorian - 1 > 0 ? firstWeekDayAsGregorian - 1 : 7
         
         return firstWeekDay // 1==월
+    }
+}
+
+fileprivate extension Date {
+    var yearInKorean: String {
+        let component = Calendar.current.component(.year, from: self)
+        return "\(component)년"
+    }
+    
+    var monthInKorean: String {
+        let component = Calendar.current.component(.month, from: self)
+        return "\(component)월"
+    }
+    
+    var previousMonth: Date {
+        var dateComponents = DateComponents()
+        dateComponents.month = -1
+        return Calendar.current.date(byAdding: dateComponents, to: self)!
+    }
+    
+    var nextMonth: Date {
+        var dateComponents = DateComponents()
+        dateComponents.month = 1
+        return Calendar.current.date(byAdding: dateComponents, to: self)!
     }
 }
 
