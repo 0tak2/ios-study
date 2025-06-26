@@ -56,14 +56,14 @@ extension ARContainerViewController {
         addTapGestureToSceneView()
     }
     
-    private func addBox() {
+    private func addBox(x: Float = 0, y: Float = 0, z: Float = -0.2) {
         // create a SceneKit geometry object
         let box = SCNBox(width: 0.05, height: 0.05, length: 0.05, chamferRadius: 0.0) // 1 = 1 meter
         
         // create a SceneKit node with the box geometry
         let boxNode = SCNNode(geometry: box)
         boxNode.geometry = box
-        boxNode.position = SCNVector3(0, 0, -0.2)
+        boxNode.position = SCNVector3(x, y, z)
         
         // add the node to scene
 //        let scene = SCNScene()
@@ -84,5 +84,33 @@ extension ARContainerViewController {
         if let node = hitTestResults.first?.node {
             node.removeFromParentNode()
         }
+        
+        // GQ: raycast가 뭐지?
+        guard let raycastQuery = sceneView.raycastQuery(from: tapLocation, allowing: .estimatedPlane, alignment: .any),
+              let raycastResult = sceneView.session.raycast(raycastQuery).first else {
+            print("no raycast result")
+            return
+        }
+        
+        let translation = raycastResult.worldTransform.translation // used custom helper propery (float4x4::translation)
+        addBox(x: translation.x, y: translation.y, z: translation.z)
     }
+}
+
+fileprivate extension float4x4 {
+    var translation: SIMD3<Float> {
+        let translation = self.columns.3
+        return .init(translation.x, translation.y, translation.z)
+    }
+    
+    /*
+     float4x4(
+         [Rxx, Ryx, Rzx, 0],
+         [Rxy, Ryy, Rzy, 0],
+         [Rxz, Ryz, Rzz, 0],
+         [Tx,  Ty,  Tz,  1] // -> 추출
+     )
+     
+     float4x4는 컬럼 단위로 취급함
+     */
 }
