@@ -53,12 +53,15 @@ extension ARContainerViewController {
 extension ARContainerViewController {
     private func prepareARSceneView() {
         addBox()
-        addTapGestureToSceneView()
+        addGestureToSceneView()
     }
     
-    private func addTapGestureToSceneView() {
+    private func addGestureToSceneView() {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(sceneViewDidTap))
         sceneView.addGestureRecognizer(tapGestureRecognizer)
+        
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(sceneViewDidTap))
+        sceneView.addGestureRecognizer(panGestureRecognizer)
     }
     
     @objc private func sceneViewDidTap(recognizer: UIGestureRecognizer) {
@@ -66,9 +69,34 @@ extension ARContainerViewController {
         removeBox(fromScreen: tapLocation)
         addBox(toScreen: tapLocation)
     }
+    
+    @objc private func sceneViewDidPan(recognizer: UIPanGestureRecognizer) {
+        if recognizer.state == .changed {
+            let tapLocation = recognizer.location(in: sceneView)
+            moveBox(fromScreen: tapLocation)
+        }
+    }
 }
 
 extension ARContainerViewController {
+    private func moveBox(fromScreen tapLocation: CGPoint) {
+        guard let raycastQuery = sceneView.raycastQuery(from: tapLocation, allowing: .estimatedPlane, alignment: .any),
+              let raycastResult = sceneView.session.raycast(raycastQuery).first else {
+            print("no raycast result")
+            return
+        }
+        
+        let worldTransform = SCNMatrix4(raycastResult.worldTransform) // GQ: World Transform이 뭐지?
+        let hitTestResults = sceneView.hitTest(tapLocation)
+        
+        guard let node = hitTestResults.first?.node else {
+            print("node not found")
+            return
+        }
+        
+        node.setWorldTransform(worldTransform)
+    }
+    
     private func removeBox(fromScreen tapLocation: CGPoint) {
         let hitTestResults = sceneView.hitTest(tapLocation, options: nil) // ARSCNView에 탭 좌표를 넘기면 힛 테스트가 가능
         
