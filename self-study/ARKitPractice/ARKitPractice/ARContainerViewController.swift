@@ -18,6 +18,7 @@ class ARContainerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setLayout()
+        addBox()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -32,8 +33,8 @@ class ARContainerViewController: UIViewController {
     }
 }
 
+/// MARK: - Layout
 extension ARContainerViewController {
-    // MARK: - Layout
     private func setLayout() {
         view.addSubview(sceneView)
         
@@ -45,5 +46,24 @@ extension ARContainerViewController {
             sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             sceneView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+    }
+}
+
+/// MARK: - Configure the scene
+extension ARContainerViewController {
+    private func addBox() {
+        // create a SceneKit geometry object
+        let box = SCNBox(width: 0.05, height: 0.05, length: 0.05, chamferRadius: 0.0) // 1 = 1 meter
+        
+        // create a SceneKit node with the box geometry
+        let boxNode = SCNNode(geometry: box)
+        boxNode.geometry = box
+        boxNode.position = SCNVector3(0, 0, -0.2)
+        
+        // add the node to scene
+//        let scene = SCNScene()
+//        scene.rootNode.addChildNode(boxNode)
+//        sceneView.scene = scene
+        sceneView.scene.rootNode.addChildNode(boxNode)
     }
 }
