@@ -18,7 +18,7 @@ class ARContainerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setLayout()
-        addBox()
+        prepareARSceneView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -51,6 +51,11 @@ extension ARContainerViewController {
 
 /// MARK: - Configure the scene
 extension ARContainerViewController {
+    private func prepareARSceneView() {
+        addBox()
+        addTapGestureToSceneView()
+    }
+    
     private func addBox() {
         // create a SceneKit geometry object
         let box = SCNBox(width: 0.05, height: 0.05, length: 0.05, chamferRadius: 0.0) // 1 = 1 meter
@@ -65,5 +70,19 @@ extension ARContainerViewController {
 //        scene.rootNode.addChildNode(boxNode)
 //        sceneView.scene = scene
         sceneView.scene.rootNode.addChildNode(boxNode)
+    }
+    
+    private func addTapGestureToSceneView() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(sceneViewDidTap))
+        sceneView.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    @objc private func sceneViewDidTap(recognizer: UIGestureRecognizer) {
+        let tapLocation = recognizer.location(in: sceneView)
+        let hitTestResults = sceneView.hitTest(tapLocation, options: nil) // ARSCNView에 탭 좌표를 넘기면 힛 테스트가 가능
+        
+        if let node = hitTestResults.first?.node {
+            node.removeFromParentNode()
+        }
     }
 }
