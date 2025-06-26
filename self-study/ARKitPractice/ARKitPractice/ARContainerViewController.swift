@@ -56,6 +56,39 @@ extension ARContainerViewController {
         addTapGestureToSceneView()
     }
     
+    private func addTapGestureToSceneView() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(sceneViewDidTap))
+        sceneView.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    @objc private func sceneViewDidTap(recognizer: UIGestureRecognizer) {
+        let tapLocation = recognizer.location(in: sceneView)
+        removeBox(fromScreen: tapLocation)
+        addBox(toScreen: tapLocation)
+    }
+}
+
+extension ARContainerViewController {
+    private func removeBox(fromScreen tapLocation: CGPoint) {
+        let hitTestResults = sceneView.hitTest(tapLocation, options: nil) // ARSCNView에 탭 좌표를 넘기면 힛 테스트가 가능
+        
+        if let node = hitTestResults.first?.node {
+            node.removeFromParentNode()
+        }
+    }
+    
+    private func addBox(toScreen tapLocation: CGPoint) {
+        // GQ: raycast가 뭐지?
+        guard let raycastQuery = sceneView.raycastQuery(from: tapLocation, allowing: .estimatedPlane, alignment: .any),
+              let raycastResult = sceneView.session.raycast(raycastQuery).first else {
+            print("no raycast result")
+            return
+        }
+        
+        let translation = raycastResult.worldTransform.translation // used custom helper propery (float4x4::translation)
+        addBox(x: translation.x, y: translation.y, z: translation.z)
+    }
+    
     private func addBox(x: Float = 0, y: Float = 0, z: Float = -0.2) {
         // create a SceneKit geometry object
         let box = SCNBox(width: 0.05, height: 0.05, length: 0.05, chamferRadius: 0.0) // 1 = 1 meter
@@ -72,29 +105,6 @@ extension ARContainerViewController {
         sceneView.scene.rootNode.addChildNode(boxNode)
     }
     
-    private func addTapGestureToSceneView() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(sceneViewDidTap))
-        sceneView.addGestureRecognizer(tapGestureRecognizer)
-    }
-    
-    @objc private func sceneViewDidTap(recognizer: UIGestureRecognizer) {
-        let tapLocation = recognizer.location(in: sceneView)
-        let hitTestResults = sceneView.hitTest(tapLocation, options: nil) // ARSCNView에 탭 좌표를 넘기면 힛 테스트가 가능
-        
-        if let node = hitTestResults.first?.node {
-            node.removeFromParentNode()
-        }
-        
-        // GQ: raycast가 뭐지?
-        guard let raycastQuery = sceneView.raycastQuery(from: tapLocation, allowing: .estimatedPlane, alignment: .any),
-              let raycastResult = sceneView.session.raycast(raycastQuery).first else {
-            print("no raycast result")
-            return
-        }
-        
-        let translation = raycastResult.worldTransform.translation // used custom helper propery (float4x4::translation)
-        addBox(x: translation.x, y: translation.y, z: translation.z)
-    }
 }
 
 fileprivate extension float4x4 {
