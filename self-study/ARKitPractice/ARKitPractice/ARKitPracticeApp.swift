@@ -11,7 +11,7 @@ import SwiftUI
 struct ARKitPracticeApp: App {
     var body: some Scene {
         WindowGroup {
-            ARContainer()
+            ARDetectImageContainer()
                 .ignoresSafeArea()
         }
     }

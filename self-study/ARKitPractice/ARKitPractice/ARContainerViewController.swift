@@ -127,9 +127,9 @@ extension ARContainerViewController {
         boxNode.position = SCNVector3(x, y, z)
         
         // add the node to scene
-//        let scene = SCNScene()
-//        scene.rootNode.addChildNode(boxNode)
-//        sceneView.scene = scene
+        let scene = SCNScene()
+        scene.rootNode.addChildNode(boxNode)
+        sceneView.scene = scene
         sceneView.scene.rootNode.addChildNode(boxNode)
     }
     
