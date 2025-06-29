@@ -54,7 +54,7 @@ extension ARContainerViewController {
 //        arView.debugOptions = [.showAnchorOrigins, .showAnchorGeometry, .showFeaturePoints]
         
         // 평면에 큐브 추가
-        addCubeModel()
+        addBall()
     }
     
     private func resetSession() {
@@ -63,13 +63,10 @@ extension ARContainerViewController {
         arView.session.run(configuration)
     }
     
-    private func addCubeModel() {
-        // Create a cube model
-        let model = Entity()
-        let mesh = MeshResource.generateBox(size: 0.1, cornerRadius: 0.005)
-        let material = SimpleMaterial(color: .gray, roughness: 0.15, isMetallic: true)
-        model.components.set(ModelComponent(mesh: mesh, materials: [material]))
-        model.position = [0, 0.05, 0]
+    private func addBall() {
+        // Create a ball model
+        let model = try! ModelEntity.load(named: "ball_basketball_realistic.usdz")
+        model.position = [0, 0, -0.1]
         
         // Create horizontal plane anchor for the content
         let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(0.2, 0.2)))
