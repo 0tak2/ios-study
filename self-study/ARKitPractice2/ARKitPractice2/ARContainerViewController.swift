@@ -10,6 +10,7 @@ import ARKit
 import RealityKit
 import SwiftUI
 import Combine
+import Basketball
 
 class ARContainerViewController: UIViewController {
     private let arView = ARView()
@@ -21,6 +22,8 @@ class ARContainerViewController: UIViewController {
     override var canBecomeFirstResponder: Bool {
         true
     }
+    
+    private let ballEntityName = "ball_basketball_realistic"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -107,6 +110,28 @@ extension ARContainerViewController {
     
     @objc private func handleTap(_ sender: UITapGestureRecognizer) {
         let tapLocation: CGPoint = sender.location(in: arView)
+        
+        let hitTestResult = arView.hitTest(tapLocation)
+        var didApplyImpulse = false
+        hitTestResult.forEach { result in
+//            print(result.entity)
+            if result.entity.name == ballEntityName {
+                // ModelEntity를 찾지 말고, PhysicsBodyComponent가 있는 엔티티에 직접 impulse 적용
+                if result.entity.components[PhysicsBodyComponent.self] != nil {
+                    if let physicsEntity = result.entity as? HasPhysics,
+                       result.entity.components[PhysicsBodyComponent.self] != nil {
+                        let impulse = SIMD3<Float>(0, 2, -5)
+                        physicsEntity.applyLinearImpulse(impulse, relativeTo: nil)
+                        didApplyImpulse = true
+                        print("Applied impulse to physics entity")
+                    }
+                }
+            }
+        }
+        guard !didApplyImpulse else {
+            return
+        }
+        
         let estimatedPlane: ARRaycastQuery.Target = .estimatedPlane
         let alignment: ARRaycastQuery.TargetAlignment = .horizontal
         
@@ -116,20 +141,22 @@ extension ARContainerViewController {
         
         if let planeRaycastResult = result.first {
             addBall(at: planeRaycastResult.worldTransform)
+            return
+        }
+    }
+    
+    private func findFirstChildModelEntity(in parent: Entity) -> ModelEntity? {
+        if let model = parent as? ModelEntity {
+            return model
         }
         
-//        if let hitTestResult = arView.hitTest(tapLocation).first,
-//           let ballEntity = hitTestResult.entity as? ModelEntity {
-////           ballEntity.name == "ball" {
-//            print("ball selected")
-//        } else {
-//            print("ball not selected")
-//        }
-        let hitTestResult = arView.hitTest(tapLocation)
-        hitTestResult.forEach { result in
-            print(result.entity.name)
+        for child in parent.children {
+            if let found = findFirstChildModelEntity(in: child) {
+                return found
+            }
         }
-        print("ended")
+        
+        return nil
     }
     
     private func resetSession() {
@@ -140,22 +167,10 @@ extension ARContainerViewController {
     }
     
     private func addBall(at position: float4x4) {
-        // Create a ball model
-        guard let ballModel = try? ModelEntity.load(named: "ball_basketball_realistic.usdz") else { return }
-        ballModel.position = [0, ballRadius, 0]
-        ballModel.generateCollisionShapes(recursive: true)
-        
-        // 물리 시뮬레이션을 위한 컴포넌트 추가
-        let ballShape = ShapeResource.generateSphere(radius: ballRadius)
-        let collisionComponent = CollisionComponent(shapes: [ballShape])
-        let physicsBodyComponent = PhysicsBodyComponent(shapes: [ballShape], mass: 0.5, material: nil, mode: .dynamic)
-        
-        ballModel.components.set(collisionComponent)
-        ballModel.components.set(physicsBodyComponent)
-        
+        // Create a ball
+        let entity = try! Entity.load(named: "Scene", in: basketballBundle)
         let anchor = AnchorEntity(world: position)
-        anchor.addChild(ballModel)
-        anchor.name = "ballAnchor"
+        anchor.addChild(entity)
         
         arView.scene.anchors.append(anchor)
     }
