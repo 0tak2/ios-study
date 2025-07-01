@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3D1859C92E139C3B00FAF98C /* Basketball in Frameworks */ = {isa = PBXBuildFile; productRef = 3D1859C82E139C3B00FAF98C /* Basketball */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3DDA2A9A2E0E6375002EF2B5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D1859C92E139C3B00FAF98C /* Basketball in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = ARKitPractice2;
 			packageProductDependencies = (
+				3D1859C82E139C3B00FAF98C /* Basketball */,
 			);
 			productName = ARKitPractice2;
 			productReference = 3DDA2A8C2E0E6374002EF2B5 /* ARKitPractice2.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 3DDA2A832E0E6374002EF2B5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3D1859C72E139C3B00FAF98C /* XCLocalSwiftPackageReference "Packages/Basketball" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3DDA2A8D2E0E6374002EF2B5 /* Products */;
 			projectDirPath = "";
@@ -562,6 +571,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3D1859C72E139C3B00FAF98C /* XCLocalSwiftPackageReference "Packages/Basketball" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Basketball;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3D1859C82E139C3B00FAF98C /* Basketball */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Basketball;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3DDA2A842E0E6374002EF2B5 /* Project object */;
 }
