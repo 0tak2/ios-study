@@ -13,6 +13,22 @@ import Combine
 class CustomARView: ARView {
     private var subscriptions: [Cancellable] = []
     
+    // MARK: - Persistence: Saving and Loading
+    lazy var mapSaveURL: URL = {
+        do {
+            return try FileManager.default
+                .url(for: .documentDirectory,
+                     in: .userDomainMask,
+                     appropriateFor: nil,
+                     create: true)
+                .appendingPathComponent("map.arexperience")
+        } catch {
+            fatalError("Can't get file save URL: \(error.localizedDescription)")
+        }
+    }()
+    
+    var captureButtonDidTap: (() -> Void)?
+    
     required init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         setup()
@@ -35,10 +51,11 @@ class CustomARView: ARView {
         resetSession()
     }
     
-    private func resetSession() {
+    func resetSession(initialWorldMap: ARWorldMap? = nil) {
         let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = [.horizontal] // 수평 평면 감지
+        configuration.planeDetection = [.horizontal, .vertical] // 평면 감지
         configuration.sceneReconstruction = .mesh
+        configuration.initialWorldMap = initialWorldMap
         self.session.run(configuration)
     }
     
