@@ -9,26 +9,19 @@ import SwiftUI
 import RealityKit
 
 struct ContentView : View {
-    @State private var triggerLoad = false
-    @State private var triggerSave = false
+    @State private var triggerAttach = false
 
     var body: some View {
         ZStack {
-            CustomARViewRepresentable(triggerLoad: $triggerLoad, triggerSave: $triggerSave)
+            CustomARViewRepresentable(triggerAttach: $triggerAttach)
             .edgesIgnoringSafeArea(.all)
             
             VStack {
                 HStack {
                     Button {
-                        triggerLoad = true
+                        triggerAttach = true
                     } label: {
-                        Text("로드")
-                    }
-                    
-                    Button {
-                        triggerSave = true
-                    } label: {
-                        Text("캡쳐")
+                        Text("붙이기")
                     }
                 }
                 

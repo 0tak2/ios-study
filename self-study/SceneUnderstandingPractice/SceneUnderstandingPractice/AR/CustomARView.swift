@@ -40,8 +40,6 @@ class CustomARView: ARView {
     
     private func setup() {
         self.environment.sceneUnderstanding.options.insert(.occlusion)
-        self.environment.sceneUnderstanding.options.insert(.physics)
-        self.environment.sceneUnderstanding.options.insert(.collision)
         self.environment.sceneUnderstanding.options.insert(.receivesLighting)
         
         subscriptions.append(
@@ -54,19 +52,10 @@ class CustomARView: ARView {
     func resetSession(initialWorldMap: ARWorldMap? = nil) {
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.horizontal, .vertical] // 평면 감지
-        configuration.sceneReconstruction = .mesh
-        configuration.initialWorldMap = initialWorldMap
         self.session.run(configuration)
     }
     
     private func onUpdate(_ event: Event) {
-        var debugMaterial = UnlitMaterial(color: .green)
-        debugMaterial.triangleFillMode = .lines
-        
-        let sceneUnderstandingQuery = EntityQuery(where: .has(SceneUnderstandingComponent.self) && .has(ModelComponent.self))
-        let queryResult = self.scene.performQuery(sceneUnderstandingQuery)
-        queryResult.forEach { entity in
-            entity.components[ModelComponent.self]?.materials = [debugMaterial]
-        }
+        // logics by every frame updated
     }
 }
