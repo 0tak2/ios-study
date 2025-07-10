@@ -17,15 +17,23 @@ struct ContentView : View {
             .edgesIgnoringSafeArea(.all)
             
             VStack {
+                Spacer()
+                
                 HStack {
                     Button {
                         triggerAttach = true
                     } label: {
-                        Text("붙이기")
+                        Image(systemName: "plus.circle")
+                            .resizable()
                     }
+                    .frame(width: 64, height: 64)
                 }
-                
-                Spacer()
+            }
+            
+            VStack {
+                HStack {
+                    Text("+")
+                }
             }
         }
     }
