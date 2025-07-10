@@ -185,4 +185,48 @@ extension CustomARView {
             arView.scene.addAnchor(anchorEntity)
         }
     }
+    
+    func attachModelEntitiesToPlane(to planeAnchor: ARPlaneAnchor, in arView: ARView) {
+        guard let frame = arView.session.currentFrame else { return }
+
+        let planeExtent = planeAnchor.planeExtent
+        let planeTransform = planeAnchor.transform
+        
+        // 5개의 ModelEntity 생성 및 배치
+        let modelCount = 5
+        
+        for _ in 0..<modelCount {
+            // 간단한 박스 모델 생성 (포스트잇 크기)
+            let boxMesh = MeshResource.generateBox(size: [postItSize, postItHeight, postItSize]) // 50cm x 1cm x 50cm
+            let material = SimpleMaterial(color: .red, isMetallic: false)
+            let modelEntity = ModelEntity(mesh: boxMesh, materials: [material])
+            
+//            // 평면 위에서의 로컬 위치 계산 (5개를 격자 형태로 배치)
+//            let row = i / 3 // 3개씩 한 줄
+//            let col = i % 3
+//            
+//            // 평면 크기를 고려한 위치 계산
+//            let spacingX = planeExtent.width / 4.0 // 평면 너비의 1/4씩 간격
+//            let spacingY = planeExtent.height / 3.0 // 평면 높이의 1/3씩 간격 (수직이므로 z가 높이)
+//            
+//            let localX = Float(col - 1) * spacingX // -1, 0, 1 위치 (좌우)
+//            let localY = Float(row - 1) * spacingY // -1, 0, 1 위치 (위아래)
+//            let localZ = Float(0.001) // 평면에서 살짝 앞으로 띄우기
+            
+            let localX = Float.random(in: -planeExtent.width / 2...planeExtent.width / 2) // 원점을 기준으로 좌우
+            let localY = Float.random(in: -planeExtent.height / 2...planeExtent.height / 2) // 원점을 기준으로 상하
+            let localZ = Float(0.001) // 평면에서 살짝 앞으로 띄우기
+            
+            // 로컬 위치를 평면 좌표계 기준으로 설정 (수직 평면)
+            let localPosition = SIMD3<Float>(localX, localY, localZ)
+            modelEntity.position = localPosition
+            
+            // AnchorEntity 생성 및 평면 앵커에 연결
+            let anchorEntity = AnchorEntity(anchor: planeAnchor)
+            anchorEntity.addChild(modelEntity)
+            
+            // ARView에 추가
+            arView.scene.addAnchor(anchorEntity)
+        }
+    }
 }
