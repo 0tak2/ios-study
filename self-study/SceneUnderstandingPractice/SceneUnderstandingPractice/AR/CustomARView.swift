@@ -52,6 +52,7 @@ class CustomARView: ARView {
     func resetSession(initialWorldMap: ARWorldMap? = nil) {
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.vertical] // 평면 감지
+        configuration.sceneReconstruction = .meshWithClassification
         self.debugOptions = [
 //            .showAnchorGeometry,
             .showFeaturePoints,
