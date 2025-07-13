@@ -13,6 +13,8 @@ extension CustomARView {
     var postItSize: Float { 0.2 }
     var postItHeight: Float { 0.01 }
     
+    // TODO: 자동으로 N 장의 카드를 겹치지 않게 배치하기
+    // TODO: 카드가 평면을 벗어나지 않게 하기
     func attachToPlane() {
         let center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
 
