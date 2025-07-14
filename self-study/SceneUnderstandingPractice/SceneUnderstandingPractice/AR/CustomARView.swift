@@ -11,7 +11,8 @@ import RealityKit
 import Combine
 
 class CustomARView: ARView {
-    private var subscriptions: [Cancellable] = []
+    var sceneSubscriptions: [Cancellable] = []
+    var collisionSubscriptions: [Entity: Cancellable] = [:]
     
     // MARK: - Persistence: Saving and Loading
     lazy var mapSaveURL: URL = {
@@ -42,7 +43,7 @@ class CustomARView: ARView {
         self.environment.sceneUnderstanding.options.insert(.occlusion)
         self.environment.sceneUnderstanding.options.insert(.receivesLighting)
         
-        subscriptions.append(
+        sceneSubscriptions.append(
             self.scene.subscribe(to: SceneEvents.Update.self, onUpdate)
         )
         
@@ -57,6 +58,7 @@ class CustomARView: ARView {
 //            .showAnchorGeometry,
             .showFeaturePoints,
             .showWorldOrigin,
+            .showPhysics,
         ]
         self.session.run(configuration)
     }
