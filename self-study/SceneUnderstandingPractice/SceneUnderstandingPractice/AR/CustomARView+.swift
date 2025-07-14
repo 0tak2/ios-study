@@ -45,9 +45,12 @@ extension CustomARView {
             let material = SimpleMaterial(color: .red, isMetallic: false)
             let modelEntity = ModelEntity(mesh: boxMesh, materials: [material])
             
-            let localX = Float.random(in: -planeExtent.width / 2...planeExtent.width / 2) // 원점을 기준으로 좌우
+            let widthEndPoint = (planeExtent.width - postItSize) / 2
+            let heightEndPoint = (planeExtent.height - postItSize) / 2
+            
+            let localX = Float.random(in: -widthEndPoint...widthEndPoint) // 원점을 기준으로 좌우
             let localY = Float(0.001) // 평면에서 살짝 앞으로 띄우기 => 수직 평면이므로 Y값을 조정하면 법선으로부터 튀어나오는 효과
-            let localZ = Float.random(in: -planeExtent.height / 2...planeExtent.height / 2) // 원점을 기준으로 상하
+            let localZ = Float.random(in: -heightEndPoint...heightEndPoint) // 원점을 기준으로 상하
             
             // 로컬 위치를 평면 좌표계 기준으로 설정 (수직 평면)
             let localPosition = SIMD3<Float>(localX, localY, localZ)
