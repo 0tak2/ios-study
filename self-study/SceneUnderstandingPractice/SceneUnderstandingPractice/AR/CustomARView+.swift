@@ -45,6 +45,7 @@ extension CustomARView {
             let boxMesh = MeshResource.generateBox(size: [postItSize, postItHeight, postItSize]) // 50cm x 1cm x 50cm
             let material = SimpleMaterial(color: .red, isMetallic: false)
             let modelEntity = ModelEntity(mesh: boxMesh, materials: [material])
+            modelEntity.components[LearningCardComponent.self] = LearningCardComponent()
             
             let widthEndPoint = (planeExtent.width - postItSize) / 2
             let heightEndPoint = (planeExtent.height - postItSize) / 2
@@ -73,28 +74,7 @@ extension CustomARView {
         }
     }
     
-//    func alreadyPlaneExist(of position: SIMD3<Float>, in anchorEntity: AnchorEntity) -> Bool {
-//        anchorEntity.children.forEach { child in
-//            let childEntityPosition = child.position(relativeTo: nil)
-//            print("childEntityPosition \(childEntityPosition)")
-//        }
-//        
-//        return true
-//    }
-    
     func alreadyPostItExist(of position: SIMD3<Float>) -> Bool {
-        for anchor in self.scene.anchors {
-            if let anchor = anchor as? AnchorEntity {
-                if alreadyPostItExist(of: position, in: anchor) {
-                    return true
-                }
-            }
-        }
-        
-        return false
-    }
-    
-    func alreadyPostItExist(of position: SIMD3<Float>, in anchorEntity: AnchorEntity) -> Bool {
         let newMin = SIMD3<Float>(
             position.x - postItSize / 2,
             position.y - postItHeight / 2,
@@ -105,9 +85,12 @@ extension CustomARView {
             position.y + postItHeight / 2,
             position.z + postItSize / 2
         )
-
-        for child in anchorEntity.children {
-            let existingPos = child.position(relativeTo: nil)
+        
+        let query = EntityQuery(where: .has(LearningCardComponent.self))
+        
+        for entity in self.scene.performQuery(query) {
+            let existingPos = entity.position(relativeTo: nil)
+            
             let existingMin = SIMD3<Float>(
                 existingPos.x - postItSize / 2,
                 existingPos.y - postItHeight / 2,
@@ -128,7 +111,7 @@ extension CustomARView {
                 return true // 이미 있음
             }
         }
-
-        return false // 중첩 없음
+        
+        return false
     }
 }
