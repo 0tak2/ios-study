@@ -39,6 +39,7 @@ extension CustomARView {
         // 5개의 ModelEntity 생성 및 배치
         let modelCount = 5
         
+        let anchorEntity = AnchorEntity(anchor: planeAnchor)
         for _ in 0..<modelCount {
             // 간단한 박스 모델 생성 (포스트잇 크기)
             let boxMesh = MeshResource.generateBox(size: [postItSize, postItHeight, postItSize]) // 50cm x 1cm x 50cm
@@ -55,13 +56,79 @@ extension CustomARView {
             // 로컬 위치를 평면 좌표계 기준으로 설정 (수직 평면)
             let localPosition = SIMD3<Float>(localX, localY, localZ)
             modelEntity.position = localPosition
-            
-            // AnchorEntity 생성 및 평면 앵커에 연결
-            let anchorEntity = AnchorEntity(anchor: planeAnchor)
+
+            // Anchor에 AnchorEntity 연결
             anchorEntity.addChild(modelEntity)
+            
+            let globalPosition = modelEntity.position(relativeTo: nil)
+            guard !alreadyPostItExist(of: globalPosition) else {
+                print("skip add modelEntity")
+                modelEntity.removeFromParent()
+                return
+            }
+            print("added modelEntity")
             
             // ARView에 추가
             arView.scene.addAnchor(anchorEntity)
         }
+    }
+    
+//    func alreadyPlaneExist(of position: SIMD3<Float>, in anchorEntity: AnchorEntity) -> Bool {
+//        anchorEntity.children.forEach { child in
+//            let childEntityPosition = child.position(relativeTo: nil)
+//            print("childEntityPosition \(childEntityPosition)")
+//        }
+//        
+//        return true
+//    }
+    
+    func alreadyPostItExist(of position: SIMD3<Float>) -> Bool {
+        for anchor in self.scene.anchors {
+            if let anchor = anchor as? AnchorEntity {
+                if alreadyPostItExist(of: position, in: anchor) {
+                    return true
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    func alreadyPostItExist(of position: SIMD3<Float>, in anchorEntity: AnchorEntity) -> Bool {
+        let newMin = SIMD3<Float>(
+            position.x - postItSize / 2,
+            position.y - postItHeight / 2,
+            position.z - postItSize / 2
+        )
+        let newMax = SIMD3<Float>(
+            position.x + postItSize / 2,
+            position.y + postItHeight / 2,
+            position.z + postItSize / 2
+        )
+
+        for child in anchorEntity.children {
+            let existingPos = child.position(relativeTo: nil)
+            let existingMin = SIMD3<Float>(
+                existingPos.x - postItSize / 2,
+                existingPos.y - postItHeight / 2,
+                existingPos.z - postItSize / 2
+            )
+            let existingMax = SIMD3<Float>(
+                existingPos.x + postItSize / 2,
+                existingPos.y + postItHeight / 2,
+                existingPos.z + postItSize / 2
+            )
+
+            let isOverlapping = (newMin.x <= existingMax.x && newMax.x >= existingMin.x) &&
+                                (newMin.y <= existingMax.y && newMax.y >= existingMin.y) &&
+                                (newMin.z <= existingMax.z && newMax.z >= existingMin.z)
+
+            if isOverlapping {
+                print("중첩 발견: \(position) overlaps with \(existingPos)")
+                return true // 이미 있음
+            }
+        }
+
+        return false // 중첩 없음
     }
 }

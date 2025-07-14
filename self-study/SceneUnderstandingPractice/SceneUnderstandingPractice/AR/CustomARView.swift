@@ -68,7 +68,7 @@ class CustomARView: ARView {
         let query = EntityQuery(where: .has(DetectedPlaneComponent.self))
         self.scene.performQuery(query).forEach { entity in
             if let entity = entity as? AnchorEntity {
-                print("entity deleted - \(entity.debugDescription.replacingOccurrences(of: "\n", with: ""))")
+//                print("entity deleted - \(entity.debugDescription.replacingOccurrences(of: "\n", with: ""))")
                 self.scene.removeAnchor(entity)
             }
         }
