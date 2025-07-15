@@ -10,6 +10,7 @@ import RealityKit
 
 struct ContentView : View {
     @State private var triggerAttach = false
+    @StateObject private var appModel = AppModel()
 
     var body: some View {
         ZStack {
@@ -17,6 +18,14 @@ struct ContentView : View {
             .edgesIgnoringSafeArea(.all)
             
             VStack {
+                HStack {
+                    Text(appModel.currentGameMode.rawValue)
+                    
+                    Spacer()
+                    
+                    Text("\(appModel.attachedCardsCount)")
+                }
+                
                 Spacer()
                 
                 HStack {
