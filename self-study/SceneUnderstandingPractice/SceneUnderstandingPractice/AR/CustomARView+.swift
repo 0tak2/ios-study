@@ -12,6 +12,9 @@ import RealityKit
 extension CustomARView {
     var postItSize: Float { 0.2 }
     var postItHeight: Float { 0.01 }
+    var gameManager: GameManager {
+        GameManager.instance
+    }
     
     func attachToPlane() {
         //        let center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
@@ -29,11 +32,31 @@ extension CustomARView {
         //                attachModelEntitiesToPlane(to: planeAnchor, in: self)
         //            }
         //        }
-        self.session.currentFrame?.anchors.forEach { anchor in
-            if let planeAnchor = anchor as? ARPlaneAnchor {
-                attachModelEntitiesToPlane(to: planeAnchor, in: self)
-            }
+        guard let anchors = self.session.currentFrame?.anchors else {
+            print("There is no anchors in currentFrame")
+            return
         }
+        
+        guard let totalCardCount = gameManager.totalCardCount else {
+            print("gameManager not configured...")
+            return
+        }
+        
+        var iterationCount = 0
+        let iterationCountMax = 10
+        while gameManager.attachedCardsCount < totalCardCount
+                && iterationCount < iterationCountMax {
+            anchors.forEach { anchor in
+                if let planeAnchor = anchor as? ARPlaneAnchor {
+                    attachModelEntitiesToPlane(to: planeAnchor, in: self)
+                    gameManager.cardsAttached()
+                }
+            }
+            
+            iterationCount += 1
+        }
+        
+        print("observer: iterationCount=\(iterationCount) iterationCountMax=\(iterationCountMax) attachedCardsCount=\(gameManager.attachedCardsCount)")
     }
     
     func createCardEntity() -> ModelEntity {
@@ -57,12 +80,18 @@ extension CustomARView {
             print("collision started")
             event.entityB.removeFromParent()
             self?.collisionSubscriptions.removeValue(forKey: event.entityB)
+            GameManager.instance.cardDetached()
+            
+            if GameManager.instance.currentMode != .ready {
+                self?.attachToPlane()
+            }
         }
         collisionSubscriptions[modelEntity] = beginEventSub
         
         return modelEntity
     }
     
+    /// 특정 평면 앵커에 특정 개수의 카드 엔티티를 부착하고, 부착한 카드 개수를 반환한다.
     func attachModelEntitiesToPlane(to planeAnchor: ARPlaneAnchor, in arView: ARView) {
         let planeExtent = planeAnchor.planeExtent
         guard planeExtent.width >= postItSize && planeExtent.height >= postItSize else {
@@ -70,89 +99,25 @@ extension CustomARView {
             return
         }
         
-        // 5개의 ModelEntity 생성 및 배치
-        let modelCount = 1
-        
         let anchorEntity = AnchorEntity(anchor: planeAnchor)
         
         let widthRangeEnd = (planeExtent.width - postItSize) / 2
         let heightRangedEnd = (planeExtent.height - postItSize) / 2
-        for _ in 0..<modelCount {
-            // 간단한 박스 모델 생성 (포스트잇 크기)
-            let modelEntity = createCardEntity()
-            
-            let localX = Float.random(in: -widthRangeEnd...widthRangeEnd) // 원점을 기준으로 좌우
-            let localY = Float(0.001) // 평면에서 살짝 앞으로 띄우기 => 수직 평면이므로 Y값을 조정하면 법선으로부터 튀어나오는 효과
-            let localZ = Float.random(in: -heightRangedEnd...heightRangedEnd) // 원점을 기준으로 상하
-            
-            // 로컬 위치를 평면 좌표계 기준으로 설정 (수직 평면)
-            let localPosition = SIMD3<Float>(localX, localY, localZ)
-            modelEntity.position = localPosition
-            
-            // Anchor에 AnchorEntity 연결
-            anchorEntity.addChild(modelEntity)
-            arView.scene.addAnchor(anchorEntity)
-            print("added modelEntity")
-            
-            // 중첩되는 포스트잇이라면 다시 제거
-            if alreadyPostItExist(of: modelEntity) {
-                print("remove modelEntity")
-                modelEntity.removeFromParent()
-            }
-        }
-    }
-    
-    func alreadyPostItExist(of newEntiy: ModelEntity) -> Bool {
-        let newPos = newEntiy.position(relativeTo: nil)
         
-        let newMin = SIMD3<Float>(
-            newPos.x - postItSize / 2,
-            newPos.y - postItHeight / 2,
-            newPos.z - postItSize / 2
-        )
-        let newMax = SIMD3<Float>(
-            newPos.x + postItSize / 2,
-            newPos.y + postItHeight / 2,
-            newPos.z + postItSize / 2
-        )
+        // 간단한 박스 모델 생성 (포스트잇 크기)
+        let modelEntity = createCardEntity()
         
-        let query = EntityQuery(where: .has(LearningCardComponent.self))
+        let localX = Float.random(in: -widthRangeEnd...widthRangeEnd) // 원점을 기준으로 좌우
+        let localY = Float(0.001) // 평면에서 살짝 앞으로 띄우기 => 수직 평면이므로 Y값을 조정하면 법선으로부터 튀어나오는 효과
+        let localZ = Float.random(in: -heightRangedEnd...heightRangedEnd) // 원점을 기준으로 상하
         
-        for entity in self.scene.performQuery(query) {
-            guard newEntiy !== entity else { continue }
-            
-            let existingPos = entity.position(relativeTo: nil)
-            
-            let existingMin = SIMD3<Float>(
-                existingPos.x - postItSize / 2,
-                existingPos.y - postItHeight / 2,
-                existingPos.z - postItSize / 2
-            )
-            let existingMax = SIMD3<Float>(
-                existingPos.x + postItSize / 2,
-                existingPos.y + postItHeight / 2,
-                existingPos.z + postItSize / 2
-            )
-            
-            let isOverlapping = (newMin.x <= existingMax.x && newMax.x >= existingMin.x) &&
-            (newMin.y <= existingMax.y && newMax.y >= existingMin.y) &&
-            (newMin.z <= existingMax.z && newMax.z >= existingMin.z)
-            
-            print("=== Overlap Check ===")
-            print("New: pos=\(newPos), min=\(newMin), max=\(newMax)")
-            print("Existing: pos=\(existingPos), min=\(existingMin), max=\(existingMax)")
-            print("X overlap: \(newMin.x) <= \(existingMax.x) && \(newMax.x) >= \(existingMin.x) = \(newMin.x <= existingMax.x && newMax.x >= existingMin.x)")
-            print("Y overlap: \(newMin.y) <= \(existingMax.y) && \(newMax.y) >= \(existingMin.y) = \(newMin.y <= existingMax.y && newMax.y >= existingMin.y)")
-            print("Z overlap: \(newMin.z) <= \(existingMax.z) && \(newMax.z) >= \(existingMin.z) = \(newMin.z <= existingMax.z && newMax.z >= existingMin.z)")
-            print("Final result: \(isOverlapping)")
-            
-            if isOverlapping {
-                print("중첩 발견: \(newPos) overlaps with \(existingPos)")
-                return true // 이미 있음
-            }
-            print("중첩 아님: \(newPos) does not overlap with \(existingPos)")
-        }
+        // 로컬 위치를 평면 좌표계 기준으로 설정 (수직 평면)
+        let localPosition = SIMD3<Float>(localX, localY, localZ)
+        modelEntity.position = localPosition
         
-        return false
+        // Anchor에 AnchorEntity 연결
+        anchorEntity.addChild(modelEntity)
+        arView.scene.addAnchor(anchorEntity)
+        print("added modelEntity")
     }
 }

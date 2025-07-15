@@ -36,6 +36,9 @@ struct ContentView : View {
                 }
             }
         }
+        .onAppear {
+            try! GameManager.instance.config(totalCardCount: 15)
+        }
     }
 }
 
