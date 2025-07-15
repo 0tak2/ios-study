@@ -82,7 +82,8 @@ extension CustomARView {
             self?.collisionSubscriptions.removeValue(forKey: event.entityB)
             GameManager.instance.cardDetached()
             
-            if GameManager.instance.currentMode != .ready {
+            if GameManager.instance.currentMode != .ready
+                && GameManager.instance.attachedCardsCount < GameManager.instance.totalCardCount ?? 15 {
                 self?.attachToPlane()
             }
         }
