@@ -47,7 +47,8 @@ extension CustomARView {
         while gameManager.attachedCardsCount < totalCardCount
                 && iterationCount < iterationCountMax {
             anchors.forEach { anchor in
-                if let planeAnchor = anchor as? ARPlaneAnchor {
+                if let planeAnchor = anchor as? ARPlaneAnchor,
+                   gameManager.attachedCardsCount < totalCardCount {
                     attachModelEntitiesToPlane(to: planeAnchor, in: self)
                     gameManager.cardsAttached()
                 }
