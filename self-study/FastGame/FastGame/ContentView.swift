@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject var model = GameModel()
+    @State private var showsGameCenterModal: Bool = false
     
     var body: some View {
         Group {
@@ -19,7 +20,11 @@ struct ContentView: View {
                         
                         Spacer()
                         
-                        Text(model.isAuthenticated ? "게임센터 인증됨" : "인증 안됨")
+                        if model.isAuthenticated {
+                            Button("대시보드") {
+                                showsGameCenterModal = true
+                            }
+                        }
                     }
                     
                     Picker("게임 레벨", selection: $model.selectedLevel) {
@@ -44,6 +49,9 @@ struct ContentView: View {
             } else {
                 MainGameView(model: model)
             }
+        }
+        .sheet(isPresented: $showsGameCenterModal) {
+            GameCenterView()
         }
         .padding()
     }

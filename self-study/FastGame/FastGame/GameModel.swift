@@ -69,10 +69,32 @@ class GameModel: ObservableObject {
         tappedCardIndices = []
         cardCount = nil
         selectedLevel = .easy
+        
+        submitRecord()
     }
     
     func resetGame() {
         mode = .notConfigured
+    }
+    
+    func submitRecord() {
+        guard let elapsedTime = self.lastGameResult?.elapsedTime,
+           let lastGameLevel = self.lastGameResult?.level else {
+            print("❌ No last result")
+            return
+        }
+        
+        Task.detached {
+            do {
+                try await GKLeaderboard.submitScore(Int(elapsedTime),
+                                                    context: 0,
+                                                    player: GKLocalPlayer.local,
+                                                    leaderboardIDs: [lastGameLevel.leaderboardId])
+                print("score submitted")
+            } catch {
+                print("error during submitting score: \(error)")
+            }
+        }
     }
     
     func cardTapped(at index: Int) {
@@ -118,6 +140,17 @@ class GameModel: ObservableObject {
                 return "Medium"
             case .hard:
                 return "Hard"
+            }
+        }
+        
+        var leaderboardId: String {
+            switch self {
+            case .easy:
+                return "leaderboard_easy_times"
+            case .medium:
+                return "leaderboard_medium_times"
+            case .hard:
+                return "leaderboard_hard_times"
             }
         }
     }
