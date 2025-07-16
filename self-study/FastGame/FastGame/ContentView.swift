@@ -14,6 +14,14 @@ struct ContentView: View {
         Group {
             if model.mode == .notConfigured {
                 VStack {
+                    HStack {
+                        Text(model.playerName)
+                        
+                        Spacer()
+                        
+                        Text(model.isAuthenticated ? "게임센터 인증됨" : "인증 안됨")
+                    }
+                    
                     Picker("게임 레벨", selection: $model.selectedLevel) {
                         ForEach(GameModel.GameLevel.allCases, id: \.self) { level in
                             Text(level.localizedDescription)

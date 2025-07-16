@@ -5,9 +5,15 @@
 //  Created by 임영택 on 7/16/25.
 //
 
-import Foundation
+import GameKit
 
 class GameModel: ObservableObject {
+    // - MARK: Properties
+    // MARK: GameKit
+    @Published var isAuthenticated = false
+    @Published var playerName: String = ""
+    
+    // MARK: Game Rules
     @Published var cardCount: Int?
     @Published var mode = GameMode.notConfigured
     @Published var selectedLevel = GameLevel.easy
@@ -15,9 +21,31 @@ class GameModel: ObservableObject {
     @Published var tappedCardIndices = [Int]()
     @Published var elapsedTime: TimeInterval = 0
     private var timer: Timer?
-    
     @Published var lastGameResult: LastGameResult?
     
+    init() {
+        authenticatePlayer()
+    }
+    
+    // - MARK: Methods
+    // MARK: GameKit
+    func authenticatePlayer() {
+        let localPlayer = GKLocalPlayer.local
+        localPlayer.authenticateHandler = { viewController, error in
+            if let viewController = viewController {
+                // TODO: UI에서 ViewController를 띄워야 함
+            } else if localPlayer.isAuthenticated {
+                DispatchQueue.main.async {
+                    self.isAuthenticated = true
+                    self.playerName = localPlayer.displayName
+                }
+            } else {
+                print("Game Center 인증 실패: \(error?.localizedDescription ?? "알 수 없는 오류")")
+            }
+        }
+    }
+    
+    // MARK: Game Rules
     func startGame() {
         mode = .playing
         startTime = Date()
