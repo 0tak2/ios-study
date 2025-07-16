@@ -7,6 +7,7 @@
 
 import SwiftUI
 import RealityKit
+import AuthenticationServices
 
 struct ContentView : View {
     @State private var triggerAttach = false

@@ -16,12 +16,14 @@ class AppModel: ObservableObject {
     
     init() {
         GameManager.instance.currentModePublisher
+            .receive(on: RunLoop.main)
             .sink { [weak self] gameMode in
                 self?.currentGameMode = gameMode
             }
             .store(in: &subscriptions)
         
         GameManager.instance.attachedCardsCountPublisher
+            .receive(on: RunLoop.main)
             .sink { [weak self] attachedCardsCount in
                 self?.attachedCardsCount = attachedCardsCount
             }
