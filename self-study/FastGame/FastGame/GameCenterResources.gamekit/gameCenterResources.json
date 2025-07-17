@@ -1,0 +1,59 @@
+{
+  "meta" : {
+    "version" : "2024-11-15"
+  },
+  "resources" : {
+    "leaderboardLocalizations" : {
+      "leaderboard_easy_times" : [
+        {
+          "formatterOverride" : "ELAPSED_TIME_CENTISECOND",
+          "locale" : "ko",
+          "localID" : "leaderboard_easy_times-ko",
+          "name" : "쉬움 레벨"
+        }
+      ],
+      "leaderboard_hard_times" : [
+        {
+          "formatterOverride" : "ELAPSED_TIME_CENTISECOND",
+          "locale" : "ko",
+          "localID" : "leaderboard_hard_times-ko",
+          "name" : "어려움 레벨"
+        }
+      ],
+      "leaderboard_medium_times" : [
+        {
+          "formatterOverride" : "ELAPSED_TIME_CENTISECOND",
+          "locale" : "ko",
+          "localID" : "leaderboard_medium_times-ko",
+          "name" : "중간 레벨"
+        }
+      ]
+    },
+    "leaderboards" : [
+      {
+        "archived" : false,
+        "defaultFormatter" : "ELAPSED_TIME_CENTISECOND",
+        "referenceName" : "쉬움 레벨 최고 시간",
+        "scoreSortType" : "ASC",
+        "submissionType" : "BEST_SCORE",
+        "vendorIdentifier" : "leaderboard_easy_times"
+      },
+      {
+        "archived" : false,
+        "defaultFormatter" : "ELAPSED_TIME_CENTISECOND",
+        "referenceName" : "중간 레벨 최고 시간",
+        "scoreSortType" : "ASC",
+        "submissionType" : "BEST_SCORE",
+        "vendorIdentifier" : "leaderboard_medium_times"
+      },
+      {
+        "archived" : false,
+        "defaultFormatter" : "ELAPSED_TIME_CENTISECOND",
+        "referenceName" : "어려움 레벨 최고 시간",
+        "scoreSortType" : "ASC",
+        "submissionType" : "BEST_SCORE",
+        "vendorIdentifier" : "leaderboard_hard_times"
+      }
+    ]
+  }
+}
