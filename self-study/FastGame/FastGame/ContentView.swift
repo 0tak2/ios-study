@@ -24,6 +24,10 @@ struct ContentView: View {
                             Button("대시보드") {
                                 showsGameCenterModal = true
                             }
+                            
+                            Button("전체 랭킹") {
+                                model.printRankingsForDebug()
+                            }
                         }
                     }
                     

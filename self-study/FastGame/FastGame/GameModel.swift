@@ -110,6 +110,29 @@ class GameModel: ObservableObject {
         }
     }
     
+    func printRankingsForDebug() {
+        Task {
+            do {
+                let leaderboards = try await GKLeaderboard.loadLeaderboards(IDs: GameLevel.allCases.map(\.leaderboardId))
+                
+                for leaderboard in leaderboards {
+                    let result = try await leaderboard.loadEntries(for: GKLeaderboard.PlayerScope.global, timeScope: .allTime, range: NSMakeRange(1, 100))
+                    let (localPlayerEntry, entries, totalPlayerCount) = result
+                    
+                    print("=== \(leaderboard.title ?? "MISSING TITLE"), \(leaderboard.baseLeaderboardID) ===")
+                    print("My Score: \(localPlayerEntry?.score ?? -1)")
+                    print("Others: ")
+                    
+                    entries.forEach { entry in
+                        print("\t\(entry.player.displayName), \(entry.score)")
+                    }
+                }
+            } catch {
+                print("Error during fetching leaderboards: \(error)")
+            }
+        }
+    }
+    
     enum GameMode {
         case notConfigured
         case playing
