@@ -78,15 +78,15 @@ extension CustomARView {
         let localY = Float.random(in: -heightRangedEnd...heightRangedEnd) // 원점을 기준으로 상하
         let localZ = Float(0.001) // 평면에서 살짝 앞으로 띄우기 => 수직 평면이므로 Y값을 조정하면 법선으로부터 튀어나오는 효과
 
-        let modelEntity = CardEntity()
+        let cardEntity = CardEntity()
         
         // 로컬 위치를 평면 좌표계 기준으로 설정 (수직 평면)
         let localPosition = SIMD3<Float>(localX, localY, localZ)
-        modelEntity.position = localPosition
+        cardEntity.position = localPosition
         
         let beginEventSub = self.scene.subscribe(
             to: CollisionEvents.Began.self,
-            on: modelEntity
+            on: cardEntity
         ) { [weak self] event in
             // 충돌이 감지되면 한 쪽 엔티티를 제거한다
             print("collision started")
@@ -98,12 +98,12 @@ extension CustomARView {
                 self?.attachToPlane()
             }
         }
-        modelEntity.entitySubs.append(beginEventSub)
+        cardEntity.entitySubs.append(beginEventSub)
         
         // Anchor에 AnchorEntity 연결
-        anchorEntity.addChild(modelEntity)
+        anchorEntity.addChild(cardEntity)
         
         arView.scene.addAnchor(anchorEntity)
-        print("added modelEntity")
+        print("added cardEntity")
     }
 }
