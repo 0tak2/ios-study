@@ -60,39 +60,6 @@ extension CustomARView {
         print("observer: iterationCount=\(iterationCount) iterationCountMax=\(iterationCountMax) attachedCardsCount=\(gameManager.attachedCardsCount)")
     }
     
-    func createCardEntity() -> ModelEntity {
-        let boxMesh = MeshResource.generateBox(size: [postItSize, postItHeight, postItSize]) // 50cm x 1cm x 50cm
-        let material = SimpleMaterial(color: .red, isMetallic: false)
-        let modelEntity = ModelEntity(mesh: boxMesh, materials: [material])
-        modelEntity.components[LearningCardComponent.self] = LearningCardComponent()
-        //        modelEntity.components[CollisionComponent.self] = CollisionComponent(
-        //          shapes: [.generateBox(size: [postItSize, postItHeight, postItSize])],
-        //          mode: .trigger,
-        //          filter: .sensor
-        //        ) // => 안된다
-        modelEntity.generateCollisionShapes(recursive: true)
-        
-        let beginEventSub = self.scene.subscribe(
-            to: CollisionEvents.Began.self,
-            on: modelEntity
-        ) { [weak self] event in
-            // 충돌이 감지되면 한 쪽 엔티티를 제거한다
-            //            modelEntity.model?.materials = [SimpleMaterial(color: .blue, isMetallic: false)]
-            print("collision started")
-            event.entityB.removeFromParent()
-            self?.collisionSubscriptions.removeValue(forKey: event.entityB)
-            GameManager.instance.cardDetached()
-            
-            if GameManager.instance.currentMode != .ready
-                && GameManager.instance.attachedCardsCount < GameManager.instance.totalCardCount ?? 15 {
-                self?.attachToPlane()
-            }
-        }
-        collisionSubscriptions[modelEntity] = beginEventSub
-        
-        return modelEntity
-    }
-    
     /// 특정 평면 앵커에 특정 개수의 카드 엔티티를 부착하고, 부착한 카드 개수를 반환한다.
     func attachModelEntitiesToPlane(to planeAnchor: ARPlaneAnchor, in arView: ARView) {
         let planeExtent = planeAnchor.planeExtent
@@ -107,18 +74,35 @@ extension CustomARView {
         let heightRangedEnd = (planeExtent.height - postItSize) / 2
         
         // 간단한 박스 모델 생성 (포스트잇 크기)
-        let modelEntity = createCardEntity()
-        
         let localX = Float.random(in: -widthRangeEnd...widthRangeEnd) // 원점을 기준으로 좌우
-        let localY = Float(0.001) // 평면에서 살짝 앞으로 띄우기 => 수직 평면이므로 Y값을 조정하면 법선으로부터 튀어나오는 효과
-        let localZ = Float.random(in: -heightRangedEnd...heightRangedEnd) // 원점을 기준으로 상하
+        let localY = Float.random(in: -heightRangedEnd...heightRangedEnd) // 원점을 기준으로 상하
+        let localZ = Float(0.001) // 평면에서 살짝 앞으로 띄우기 => 수직 평면이므로 Y값을 조정하면 법선으로부터 튀어나오는 효과
+
+        let modelEntity = CardEntity()
         
         // 로컬 위치를 평면 좌표계 기준으로 설정 (수직 평면)
         let localPosition = SIMD3<Float>(localX, localY, localZ)
         modelEntity.position = localPosition
         
+        let beginEventSub = self.scene.subscribe(
+            to: CollisionEvents.Began.self,
+            on: modelEntity
+        ) { [weak self] event in
+            // 충돌이 감지되면 한 쪽 엔티티를 제거한다
+            print("collision started")
+            event.entityB.removeFromParent()
+            GameManager.instance.cardDetached()
+            
+            if GameManager.instance.currentMode != .ready
+                && GameManager.instance.attachedCardsCount < GameManager.instance.totalCardCount ?? 15 {
+                self?.attachToPlane()
+            }
+        }
+        modelEntity.entitySubs.append(beginEventSub)
+        
         // Anchor에 AnchorEntity 연결
         anchorEntity.addChild(modelEntity)
+        
         arView.scene.addAnchor(anchorEntity)
         print("added modelEntity")
     }
