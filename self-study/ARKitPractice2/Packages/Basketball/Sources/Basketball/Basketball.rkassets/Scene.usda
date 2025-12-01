@@ -10,14 +10,30 @@
 
 def Xform "Root"
 {
-    def "ball_basketball_realistic" (
+    reorder nameChildren = ["kong", "ball_basketball_realistic"]
+    def "kong" (
         active = true
-        prepend references = @ball_basketball_realistic.usdz@
+        prepend references = @kong.usdz@
     )
     {
-        float3 xformOp:scale = (1, 1, 1)
-        float3 xformOp:translate = (0, 0, 0)
+        float3 xformOp:scale = (0.005, 0.005, 0.005)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def RealityKitComponent "RigidBody"
+        {
+            uniform token info:id = "RealityKit.RigidBody"
+
+            def RealityKitStruct "massFrame"
+            {
+                def RealityKitStruct "m_pose"
+                {
+                }
+            }
+
+            def RealityKitStruct "material"
+            {
+            }
+        }
 
         def RealityKitComponent "Collider"
         {
@@ -28,35 +44,13 @@ def Xform "Root"
 
             def RealityKitStruct "Shape"
             {
-                float3 extent = (0.24557449, 0.24854775, 0.24557525)
-                float radius = 0.124273874
-                token shapeType = "Sphere"
+                float3 extent = (298.64484, 298.64487, 228.21146)
+                token shapeType = "Box"
 
                 def RealityKitStruct "pose"
                 {
-                    float3 position = (-6.854534e-7, 0.124273874, -0.0000019855797)
+                    float3 position = (-0.870636, 0.105407715, -2.5947533)
                 }
-            }
-        }
-
-        def RealityKitComponent "RigidBody"
-        {
-            uniform token info:id = "RealityKit.RigidBody"
-
-            def RealityKitStruct "massFrame"
-            {
-                float m_mass = 0.6
-
-                def RealityKitStruct "m_pose"
-                {
-                }
-            }
-
-            def RealityKitStruct "material"
-            {
-                double dynamicFriction = 0.7
-                double restitution = 0.7
-                double staticFriction = 0.7
             }
         }
     }

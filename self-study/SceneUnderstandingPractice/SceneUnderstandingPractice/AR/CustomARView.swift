@@ -43,10 +43,12 @@ class CustomARView: ARView {
         self.environment.sceneUnderstanding.options.insert(.occlusion)
         self.environment.sceneUnderstanding.options.insert(.receivesLighting)
         
-        sceneSubscriptions.append(
-            self.scene.subscribe(to: SceneEvents.Update.self, onUpdate)
-        )
+//        sceneSubscriptions.append(
+//            self.scene.subscribe(to: SceneEvents.Update.self, onUpdate)
+//        )
         
+        self.session.delegate = self
+//
         resetSession()
     }
     
@@ -54,12 +56,12 @@ class CustomARView: ARView {
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.vertical] // 평면 감지
         configuration.sceneReconstruction = .meshWithClassification
-        self.debugOptions = [
-//            .showAnchorGeometry,
-            .showFeaturePoints,
-            .showWorldOrigin,
-            .showPhysics,
-        ]
+//        self.debugOptions = [
+////            .showAnchorGeometry,
+//            .showFeaturePoints,
+//            .showWorldOrigin,
+//            .showPhysics,
+//        ]
         self.session.run(configuration)
     }
     
