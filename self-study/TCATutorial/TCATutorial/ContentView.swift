@@ -37,6 +37,30 @@ struct ContentView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
       }
       
+      Button(store.isTimerRunning ? "Stop timer" : "Start timer") {
+        store.send(.toggleTimerButtonTapped)
+      }
+      .font(.largeTitle)
+      .padding()
+      .background(.black.opacity(0.1))
+      .clipShape(RoundedRectangle(cornerRadius: 10))
+      
+      Button("Advice") {
+        store.send(.adviceButtonTapped)
+      }
+      .font(.largeTitle)
+      .padding()
+      .background(.black.opacity(0.1))
+      .clipShape(RoundedRectangle(cornerRadius: 10))
+      
+      if store.isLoading {
+        ProgressView()
+      } else if let fact = store.advice {
+        Text(fact)
+          .font(.largeTitle)
+          .multilineTextAlignment(.center)
+          .padding()
+      }
     }
     .padding()
   }
