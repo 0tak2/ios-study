@@ -11,7 +11,7 @@ import Foundation
 @Reducer
 struct CounterFeature {
   @ObservableState
-  struct State {
+  struct State: Equatable {
     var count = 0
     var advice: String?
     var isLoading = false
@@ -26,6 +26,9 @@ struct CounterFeature {
     case toggleTimerButtonTapped
     case timerTick
   }
+  
+  @Dependency(\.continuousClock) var clock
+  @Dependency(\.adviceClient) var adviceClient
   
   enum CancelID { case timer }
   
@@ -58,14 +61,7 @@ struct CounterFeature {
         
         return .run { [count = state.count] send in
           // ✅ Do async work in here, and send actions back into the system.
-          let (data, _) = try await URLSession.shared
-            .data(from: URL(string: "https://api.adviceslip.com/advice/\(count)")!)
-          let decoder = JSONDecoder()
-          let adviceResponse = try? decoder.decode(AdviceResponse.self, from: data)
-          
-          if let adviceReponse = adviceResponse {
-            await send(.adviceResponse(adviceReponse.slip.advice))
-          }
+          try await send(.adviceResponse(adviceClient.fetchAdvice(idx: count)))
         }
       case .adviceResponse(let advice):
         state.advice = advice
@@ -82,8 +78,7 @@ struct CounterFeature {
         
         if state.isTimerRunning {
           return .run { send in
-            while true {
-              try await Task.sleep(for: .seconds(1))
+            for await _ in self.clock.timer(interval: .seconds(1)) {
               await send(.timerTick)
             }
           }
